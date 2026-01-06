@@ -1083,13 +1083,21 @@ def get_admin_dashboard_html(password: str) -> str:
 # ============================================================
 
 @router.post("/api/v1/admin/auth/login")
-async def admin_login(request_data: dict):
+async def admin_login(request: Request):
     """
     Login endpoint for admin dashboard.
     Verifies user_id + email combination against authorized admins.
     """
+    try:
+        request_data = await request.json()
+    except Exception as e:
+        print(f"Admin login: Failed to parse JSON: {e}")
+        return {"success": False, "error": "Invalid request format"}
+
     email = request_data.get("email", "").lower().strip()
     user_id = request_data.get("user_id", "").strip()
+
+    print(f"Admin login attempt: email={email}, user_id={user_id}")
 
     if not email or not user_id:
         return {"success": False, "error": "Email and User ID are required"}
@@ -1097,12 +1105,13 @@ async def admin_login(request_data: dict):
     # Check if user is authorized admin
     if user_id not in AUTHORIZED_ADMINS:
         print(f"Admin login failed: Unknown user_id {user_id}")
+        print(f"Authorized admins: {list(AUTHORIZED_ADMINS.keys())}")
         return {"success": False, "error": "Unauthorized access"}
 
     # Verify email matches
     expected_email = AUTHORIZED_ADMINS[user_id].lower()
     if email != expected_email:
-        print(f"Admin login failed: Email mismatch for {user_id}")
+        print(f"Admin login failed: Email mismatch for {user_id}. Expected: {expected_email}, Got: {email}")
         return {"success": False, "error": "Unauthorized access"}
 
     # Return admin password as session token for API calls
