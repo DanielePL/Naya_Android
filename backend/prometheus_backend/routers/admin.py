@@ -13,12 +13,13 @@ from datetime import datetime, timedelta
 router = APIRouter(tags=["Admin"])
 
 # Legacy password support (will be deprecated)
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "prometheus_admin_2024")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "naya_admin_2024")
 
 # Authorized admin users (user_id -> email)
 AUTHORIZED_ADMINS = {
     "faba7636-66b9-43cd-8570-37cdc32ffff0": "danielepauli@gmail.com",
     "b63ad00f-95c7-4ca3-9f6f-1b281f5c78a7": "ks.k.kaenel@gmail.com",
+    "5f4afbeb-0b0e-46c7-9caf-0d95c57fbd93": "kloe.borge18@gmail.com",  # Chloe - App Owner
 }
 
 # Session storage (in production, use Redis or database)
@@ -80,7 +81,7 @@ ADMIN_LOGIN_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prometheus Admin - Login</title>
+    <title>Naya Admin - Login</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                display: flex; justify-content: center; align-items: center;
@@ -111,7 +112,7 @@ ADMIN_LOGIN_HTML = """
 </head>
 <body>
     <div class="login-box">
-        <h1>Prometheus Admin</h1>
+        <h1>Naya Admin</h1>
         <p class="subtitle">Secure access for authorized administrators only</p>
 
         <form id="loginForm" onsubmit="handleLogin(event)">
@@ -189,7 +190,7 @@ def get_admin_dashboard_html(password: str) -> str:
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Prometheus Admin Dashboard</title>
+        <title>Naya Admin Dashboard</title>
         <style>
             * {{ box-sizing: border-box; }}
             body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -248,7 +249,7 @@ def get_admin_dashboard_html(password: str) -> str:
     </head>
     <body>
         <div class="header">
-            <h1>Prometheus Cost Analytics</h1>
+            <h1>Naya Cost Analytics</h1>
             <button class="refresh-btn" onclick="loadAllData()">Refresh All</button>
         </div>
 
@@ -1902,7 +1903,7 @@ async def admin_create_partner(request: Request, password: str):
         data = await request.json()
         client = get_supabase_client()
 
-        password_plain = data.get('password', 'prometheus2024')
+        password_plain = data.get('password', 'naya2024')
         password_hash = hashlib.sha256(password_plain.encode()).hexdigest()
 
         referral_code = data.get('referral_code', '').upper()
@@ -2604,7 +2605,7 @@ async def admin_send_revolut_payout(request: Request, password: str):
             counterparty_id=counterparty_id,
             amount=total_amount,
             currency="EUR",
-            reference=f"Prometheus Commission - {partner.get('referral_code', '')}"
+            reference=f"Naya Commission - {partner.get('referral_code', '')}"
         )
 
         if not payout_result.get('success'):
