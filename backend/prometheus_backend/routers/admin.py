@@ -85,28 +85,29 @@ ADMIN_LOGIN_HTML = """
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                display: flex; justify-content: center; align-items: center;
-               min-height: 100vh; margin: 0; background: #0f0f0f; color: #fff; }
-        .login-box { background: #1a1a1a; padding: 40px; border-radius: 12px;
-                     box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 400px; width: 90%; }
-        h1 { color: #ff6b35; margin-bottom: 10px; }
-        .subtitle { color: #666; font-size: 14px; margin-bottom: 30px; }
+               min-height: 100vh; margin: 0; background: #141414; color: #FAFAFA; }
+        .login-box { background: #1C1C1C; padding: 40px; border-radius: 16px;
+                     box-shadow: 0 4px 24px rgba(0,0,0,0.4); max-width: 400px; width: 90%;
+                     border: 1px solid #333333; }
+        h1 { color: #A78BFA; margin-bottom: 10px; font-weight: 600; }
+        .subtitle { color: #999999; font-size: 14px; margin-bottom: 30px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; color: #888; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; }
-        input { padding: 12px 16px; font-size: 16px; border: 1px solid #333;
-                border-radius: 8px; background: #2a2a2a; color: #fff; width: 100%; box-sizing: border-box; }
-        input:focus { border-color: #ff6b35; outline: none; }
-        button { padding: 12px 24px; font-size: 16px; background: #ff6b35;
+        label { display: block; color: #999999; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; }
+        input { padding: 12px 16px; font-size: 16px; border: 1px solid #333333;
+                border-radius: 8px; background: #262626; color: #FAFAFA; width: 100%; box-sizing: border-box; }
+        input:focus { border-color: #A78BFA; outline: none; box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.2); }
+        button { padding: 12px 24px; font-size: 16px; background: #A78BFA;
                  color: #fff; border: none; border-radius: 8px; cursor: pointer;
-                 margin-top: 10px; width: 100%; }
-        button:hover { background: #ff8555; }
-        button:disabled { background: #444; cursor: not-allowed; }
-        .error { color: #ef4444; font-size: 14px; margin-top: 15px; display: none; }
-        .divider { border-top: 1px solid #333; margin: 25px 0; position: relative; }
+                 margin-top: 10px; width: 100%; font-weight: 500; transition: all 0.2s; }
+        button:hover { background: #C4B5FD; }
+        button:disabled { background: #333333; cursor: not-allowed; color: #666666; }
+        .error { color: #EF4444; font-size: 14px; margin-top: 15px; display: none; }
+        .divider { border-top: 1px solid #333333; margin: 25px 0; position: relative; }
         .divider span { position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-                        background: #1a1a1a; padding: 0 10px; color: #666; font-size: 12px; }
+                        background: #1C1C1C; padding: 0 10px; color: #666666; font-size: 12px; }
         .legacy-login { margin-top: 20px; }
-        .legacy-login summary { color: #666; font-size: 13px; cursor: pointer; }
-        .legacy-login summary:hover { color: #888; }
+        .legacy-login summary { color: #666666; font-size: 13px; cursor: pointer; }
+        .legacy-login summary:hover { color: #A78BFA; }
         .legacy-form { margin-top: 15px; }
     </style>
 </head>
@@ -194,57 +195,61 @@ def get_admin_dashboard_html(password: str) -> str:
         <style>
             * {{ box-sizing: border-box; }}
             body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                   margin: 0; padding: 20px; background: #0f0f0f; color: #e0e0e0; }}
+                   margin: 0; padding: 20px; background: #141414; color: #FAFAFA; }}
             .header {{ display: flex; justify-content: space-between; align-items: center;
-                      margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #333; }}
-            h1 {{ color: #ff6b35; margin: 0; }}
-            .refresh-btn {{ background: #333; color: #fff; border: none; padding: 10px 20px;
-                           border-radius: 8px; cursor: pointer; }}
-            .refresh-btn:hover {{ background: #444; }}
+                      margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #333333; }}
+            h1 {{ color: #A78BFA; margin: 0; font-weight: 600; }}
+            .refresh-btn {{ background: #333333; color: #FAFAFA; border: none; padding: 10px 20px;
+                           border-radius: 8px; cursor: pointer; transition: all 0.2s; }}
+            .refresh-btn:hover {{ background: #A78BFA; }}
             .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
                     gap: 15px; margin-bottom: 25px; }}
-            .card {{ background: #1a1a1a; border-radius: 12px; padding: 20px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.2); }}
-            .card.highlight {{ border: 2px solid #ff6b35; }}
-            .card.green {{ border-left: 4px solid #4ade80; }}
-            .card.red {{ border-left: 4px solid #ef4444; }}
-            .card.blue {{ border-left: 4px solid #60a5fa; }}
-            .card.orange {{ border-left: 4px solid #fb923c; }}
-            .card.purple {{ border-left: 4px solid #a855f7; }}
-            .card h2 {{ color: #ff6b35; margin-top: 0; font-size: 14px; text-transform: uppercase; }}
-            .card h3 {{ color: #888; margin: 15px 0 10px 0; font-size: 13px; }}
-            .stat {{ font-size: 28px; font-weight: bold; color: #fff; }}
+            .card {{ background: #1C1C1C; border-radius: 12px; padding: 20px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2); border: 1px solid #333333; }}
+            .card.highlight {{ border: 2px solid #A78BFA; }}
+            .card.green {{ border-left: 4px solid #10B981; }}
+            .card.red {{ border-left: 4px solid #EF4444; }}
+            .card.blue {{ border-left: 4px solid #3B82F6; }}
+            .card.orange {{ border-left: 4px solid #F59E0B; }}
+            .card.purple {{ border-left: 4px solid #A78BFA; }}
+            .card h2 {{ color: #A78BFA; margin-top: 0; font-size: 14px; text-transform: uppercase; }}
+            .card h3 {{ color: #999999; margin: 15px 0 10px 0; font-size: 13px; }}
+            .stat {{ font-size: 28px; font-weight: bold; color: #FAFAFA; }}
             .stat.small {{ font-size: 22px; }}
-            .stat-label {{ color: #666; font-size: 12px; margin-top: 4px; }}
-            .profit {{ color: #4ade80; }}
-            .loss {{ color: #ef4444; }}
+            .stat-label {{ color: #666666; font-size: 12px; margin-top: 4px; }}
+            .profit {{ color: #10B981; }}
+            .loss {{ color: #EF4444; }}
             .table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
-            .table th, .table td {{ padding: 10px 12px; text-align: left; border-bottom: 1px solid #333; }}
-            .table th {{ color: #ff6b35; font-weight: 600; font-size: 12px; text-transform: uppercase; }}
-            .table tr:hover {{ background: #222; }}
-            .cost {{ color: #4ade80; }}
+            .table th, .table td {{ padding: 10px 12px; text-align: left; border-bottom: 1px solid #333333; }}
+            .table th {{ color: #A78BFA; font-weight: 600; font-size: 12px; text-transform: uppercase; }}
+            .table tr:hover {{ background: #262626; }}
+            .cost {{ color: #10B981; }}
             .tabs {{ display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }}
-            .tab {{ padding: 8px 16px; background: #222; border: none; color: #888;
-                   border-radius: 8px; cursor: pointer; font-size: 13px; }}
-            .tab.active {{ background: #ff6b35; color: #fff; }}
+            .tab {{ padding: 8px 16px; background: #262626; border: none; color: #999999;
+                   border-radius: 8px; cursor: pointer; font-size: 13px; transition: all 0.2s; }}
+            .tab.active {{ background: #A78BFA; color: #FAFAFA; }}
+            .tab:hover {{ background: #333333; }}
             .section {{ margin-bottom: 30px; }}
-            .section-title {{ color: #ff6b35; font-size: 18px; margin-bottom: 15px;
-                             padding-bottom: 10px; border-bottom: 1px solid #333; }}
+            .section-title {{ color: #A78BFA; font-size: 18px; margin-bottom: 15px;
+                             padding-bottom: 10px; border-bottom: 1px solid #333333; }}
             .form-row {{ display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }}
-            .form-row input, .form-row select {{ padding: 10px 12px; background: #222; border: 1px solid #333;
-                                                 border-radius: 6px; color: #fff; font-size: 14px; }}
+            .form-row input, .form-row select {{ padding: 10px 12px; background: #262626; border: 1px solid #333333;
+                                                 border-radius: 6px; color: #FAFAFA; font-size: 14px; }}
+            .form-row input:focus, .form-row select:focus {{ border-color: #A78BFA; outline: none; }}
             .form-row input {{ flex: 1; min-width: 150px; }}
             .form-row select {{ min-width: 140px; }}
-            .btn {{ padding: 10px 20px; background: #ff6b35; color: #fff; border: none;
-                   border-radius: 6px; cursor: pointer; font-size: 14px; }}
-            .btn:hover {{ background: #ff8555; }}
-            .btn.secondary {{ background: #333; }}
-            .btn.danger {{ background: #ef4444; }}
+            .btn {{ padding: 10px 20px; background: #A78BFA; color: #FAFAFA; border: none;
+                   border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }}
+            .btn:hover {{ background: #C4B5FD; }}
+            .btn.secondary {{ background: #333333; }}
+            .btn.secondary:hover {{ background: #404040; }}
+            .btn.danger {{ background: #EF4444; }}
+            .btn.danger:hover {{ background: #F87171; }}
             .badge {{ display: inline-block; padding: 4px 10px; border-radius: 12px;
                      font-size: 11px; font-weight: 600; }}
-            .badge.below {{ background: #064e3b; color: #4ade80; }}
-            .badge.average {{ background: #3f3f00; color: #fbbf24; }}
-            .badge.high {{ background: #450a0a; color: #ef4444; }}
+            .badge.below {{ background: rgba(16, 185, 129, 0.2); color: #10B981; }}
+            .badge.average {{ background: rgba(245, 158, 11, 0.2); color: #F59E0B; }}
+            .badge.high {{ background: rgba(239, 68, 68, 0.2); color: #EF4444; }}
         </style>
     </head>
     <body>
@@ -352,17 +357,17 @@ def get_admin_dashboard_html(password: str) -> str:
                     <div style="display: flex; gap: 30px; margin-top: 15px;">
                         <div style="flex: 1; text-align: center; padding: 15px; background: #222; border-radius: 8px;">
                             <div style="color: #888; font-size: 12px; margin-bottom: 5px;">MONTHLY SUBS ONLY</div>
-                            <div class="stat" id="be-monthly-users" style="color: #60a5fa;">0</div>
+                            <div class="stat" id="be-monthly-users" style="color: #3B82F6;">0</div>
                             <div class="stat-label">@ $<span id="be-monthly-price">9.99</span>/mo net</div>
                         </div>
                         <div style="flex: 1; text-align: center; padding: 15px; background: #222; border-radius: 8px;">
                             <div style="color: #888; font-size: 12px; margin-bottom: 5px;">YEARLY SUBS ONLY</div>
-                            <div class="stat" id="be-yearly-users" style="color: #4ade80;">0</div>
+                            <div class="stat" id="be-yearly-users" style="color: #10B981;">0</div>
                             <div class="stat-label">@ $<span id="be-yearly-price">59.99</span>/yr net</div>
                         </div>
-                        <div style="flex: 1; text-align: center; padding: 15px; background: #333; border-radius: 8px; border: 1px solid #ff6b35;">
-                            <div style="color: #ff6b35; font-size: 12px; margin-bottom: 5px;">REALISTIC MIX (65/35)</div>
-                            <div class="stat" id="be-mixed-users" style="color: #ff6b35;">0</div>
+                        <div style="flex: 1; text-align: center; padding: 15px; background: #333; border-radius: 8px; border: 1px solid #A78BFA;">
+                            <div style="color: #A78BFA; font-size: 12px; margin-bottom: 5px;">REALISTIC MIX (65/35)</div>
+                            <div class="stat" id="be-mixed-users" style="color: #A78BFA;">0</div>
                             <div class="stat-label">65% monthly / 35% yearly</div>
                         </div>
                     </div>
@@ -380,7 +385,7 @@ def get_admin_dashboard_html(password: str) -> str:
                         </div>
                         <div style="display: flex; justify-content: space-between; padding-top: 8px; border-top: 1px solid #333;">
                             <span style="font-weight: bold;">Total Monthly:</span>
-                            <span style="font-weight: bold; color: #ff6b35;">$<span id="be-total-monthly">0</span></span>
+                            <span style="font-weight: bold; color: #A78BFA;">$<span id="be-total-monthly">0</span></span>
                         </div>
                     </div>
                 </div>
@@ -491,14 +496,14 @@ def get_admin_dashboard_html(password: str) -> str:
             <div id="salaries-tab" style="display:none;">
                 <h2>Employee Salaries (Variable - Based on Net Revenue)</h2>
                 <div style="background: #222; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <div style="color: #ff6b35; font-size: 14px; margin-bottom: 10px;">Salary Calculation Formula</div>
+                    <div style="color: #A78BFA; font-size: 14px; margin-bottom: 10px;">Salary Calculation Formula</div>
                     <div style="color: #888; font-size: 13px; line-height: 1.8;">
-                        <strong style="color: #4ade80;">Net Available</strong> = Gross Revenue - Operating Costs - 15% Reserve<br>
-                        <strong style="color: #60a5fa;">Employee Salary</strong> = Net Available × Revenue Share %
+                        <strong style="color: #10B981;">Net Available</strong> = Gross Revenue - Operating Costs - 15% Reserve<br>
+                        <strong style="color: #3B82F6;">Employee Salary</strong> = Net Available × Revenue Share %
                     </div>
                 </div>
                 <div style="background: #1a3a1a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #2a5a2a;">
-                    <h3 style="color: #4ade80; margin: 0 0 10px 0;">Current Month Calculation</h3>
+                    <h3 style="color: #10B981; margin: 0 0 10px 0;">Current Month Calculation</h3>
                     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; text-align: center;">
                         <div>
                             <div style="color: #888; font-size: 11px;">GROSS REVENUE</div>
@@ -510,20 +515,20 @@ def get_admin_dashboard_html(password: str) -> str:
                         </div>
                         <div>
                             <div style="color: #888; font-size: 11px;">RESERVE (15%)</div>
-                            <div style="color: #fb923c; font-size: 18px; font-weight: bold;" id="sal-reserve">-$0.00</div>
+                            <div style="color: #F59E0B; font-size: 18px; font-weight: bold;" id="sal-reserve">-$0.00</div>
                         </div>
                         <div>
                             <div style="color: #888; font-size: 11px;">NET AVAILABLE</div>
-                            <div style="color: #4ade80; font-size: 18px; font-weight: bold;" id="sal-net">$0.00</div>
+                            <div style="color: #10B981; font-size: 18px; font-weight: bold;" id="sal-net">$0.00</div>
                         </div>
                         <div>
                             <div style="color: #888; font-size: 11px;">TOTAL SALARIES</div>
-                            <div style="color: #60a5fa; font-size: 18px; font-weight: bold;" id="sal-total">$0.00</div>
+                            <div style="color: #3B82F6; font-size: 18px; font-weight: bold;" id="sal-total">$0.00</div>
                         </div>
                     </div>
                 </div>
                 <div style="margin-bottom: 20px; padding: 15px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333;">
-                    <div style="color: #ff6b35; font-size: 14px; margin-bottom: 10px;">Add Employee</div>
+                    <div style="color: #A78BFA; font-size: 14px; margin-bottom: 10px;">Add Employee</div>
                     <div class="form-row">
                         <input type="text" id="emp-name" placeholder="Name" style="flex: 2;">
                         <input type="text" id="emp-role" placeholder="Role (e.g., Developer)" style="flex: 1.5;">
@@ -559,7 +564,7 @@ def get_admin_dashboard_html(password: str) -> str:
                     <button class="btn" onclick="filterRevenueByMonth()" style="padding: 8px 16px;">Filter</button>
                 </div>
                 <div id="monthly-summary" style="display: none; margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #1a3a1a 0%, #1a1a1a 100%); border-radius: 8px; border: 1px solid #2a5a2a;">
-                    <h3 style="color: #4ade80; margin: 0 0 15px 0;">Monthly Summary: <span id="summary-month">-</span></h3>
+                    <h3 style="color: #10B981; margin: 0 0 15px 0;">Monthly Summary: <span id="summary-month">-</span></h3>
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
                         <div style="text-align: center;">
                             <div style="color: #888; font-size: 12px;">GROSS REVENUE</div>
@@ -571,16 +576,16 @@ def get_admin_dashboard_html(password: str) -> str:
                         </div>
                         <div style="text-align: center;">
                             <div style="color: #888; font-size: 12px;">NET REVENUE</div>
-                            <div style="color: #4ade80; font-size: 24px; font-weight: bold;" id="summary-net">$0.00</div>
+                            <div style="color: #10B981; font-size: 24px; font-weight: bold;" id="summary-net">$0.00</div>
                         </div>
                         <div style="text-align: center;">
                             <div style="color: #888; font-size: 12px;">TRANSACTIONS</div>
-                            <div style="color: #60a5fa; font-size: 24px; font-weight: bold;" id="summary-count">0</div>
+                            <div style="color: #3B82F6; font-size: 24px; font-weight: bold;" id="summary-count">0</div>
                         </div>
                     </div>
                 </div>
                 <div style="margin-bottom: 20px; padding: 15px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333;">
-                    <div style="color: #ff6b35; font-size: 14px; margin-bottom: 10px;">Add New Revenue Entry</div>
+                    <div style="color: #A78BFA; font-size: 14px; margin-bottom: 10px;">Add New Revenue Entry</div>
                     <div class="form-row">
                         <select id="rev-platform">
                             <option value="ios">iOS (Apple)</option>
@@ -986,7 +991,7 @@ def get_admin_dashboard_html(password: str) -> str:
                     const employees = data.employees || [];
                     const html = employees.map(e => {{
                         const targetPercent = e.base_salary > 0 ? ((e.calculated_salary / e.base_salary) * 100).toFixed(0) : 0;
-                        const percentColor = targetPercent >= 100 ? '#4ade80' : targetPercent >= 50 ? '#fbbf24' : '#ef4444';
+                        const percentColor = targetPercent >= 100 ? '#10B981' : targetPercent >= 50 ? '#fbbf24' : '#ef4444';
                         return `
                             <tr>
                                 <td>${{e.name}}</td>
