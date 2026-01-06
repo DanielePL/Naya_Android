@@ -116,7 +116,7 @@ ADMIN_LOGIN_HTML = """
         <h1>Naya Admin</h1>
         <p class="subtitle">Secure access for authorized administrators only</p>
 
-        <form id="loginForm" onsubmit="handleLogin(event)">
+        <form id="loginForm" onsubmit="return handleLogin(event)">
             <div class="form-group">
                 <label>Email</label>
                 <input type="email" id="email" placeholder="admin@example.com" required>
@@ -125,7 +125,7 @@ ADMIN_LOGIN_HTML = """
                 <label>User ID</label>
                 <input type="text" id="userId" placeholder="Your Supabase User ID" required>
             </div>
-            <button type="submit" id="loginBtn">Login</button>
+            <button type="button" id="loginBtn" onclick="handleLogin(event)">Login</button>
             <div class="error" id="error"></div>
         </form>
 
@@ -144,41 +144,60 @@ ADMIN_LOGIN_HTML = """
     </div>
 
     <script>
+        console.log('Naya Admin Login script loaded');
+
         async function handleLogin(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
+            console.log('handleLogin called');
+
             const btn = document.getElementById('loginBtn');
             const error = document.getElementById('error');
-            const email = document.getElementById('email').value;
-            const userId = document.getElementById('userId').value;
+            const email = document.getElementById('email').value.trim();
+            const userId = document.getElementById('userId').value.trim();
+
+            console.log('Attempting login with:', { email, userId });
+
+            if (!email || !userId) {
+                error.textContent = 'Please enter both email and user ID';
+                error.style.display = 'block';
+                return false;
+            }
 
             btn.disabled = true;
             btn.textContent = 'Logging in...';
             error.style.display = 'none';
 
             try {
+                console.log('Sending fetch request to /api/v1/admin/auth/login');
                 const res = await fetch('/api/v1/admin/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, user_id: userId })
+                    body: JSON.stringify({ email: email, user_id: userId })
                 });
 
+                console.log('Response status:', res.status);
                 const data = await res.json();
+                console.log('Response data:', data);
 
                 if (data.success && data.session_token) {
-                    // Store session and redirect
-                    window.location.href = '/admin?session=' + data.session_token;
+                    console.log('Login successful, redirecting...');
+                    window.location.href = '/admin?password=' + data.session_token;
                 } else {
                     error.textContent = data.error || 'Login failed. Check your credentials.';
                     error.style.display = 'block';
                 }
             } catch (err) {
-                error.textContent = 'Connection error. Please try again.';
+                console.error('Fetch error:', err);
+                error.textContent = 'Connection error: ' + err.message;
                 error.style.display = 'block';
             }
 
             btn.disabled = false;
             btn.textContent = 'Login';
+            return false;
         }
+
+        console.log('Script initialization complete');
     </script>
 </body>
 </html>
