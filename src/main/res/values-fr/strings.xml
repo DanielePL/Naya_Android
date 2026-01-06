@@ -1,0 +1,105 @@
+<resources>
+    <string name="app_name">Naya</string>
+
+    <!-- Account Screen - Section Headers -->
+    <string name="section_my_sport">MON SPORT</string>
+    <string name="section_body_stats">DONNÉES CORPORELLES</string>
+    <string name="section_nutrition_goals">OBJECTIFS NUTRITIONNELS</string>
+    <string name="section_settings">PARAMÈTRES</string>
+
+    <!-- Account Screen - Profile Header -->
+    <string name="member_title">Membre Naya</string>
+    <string name="tier_pro">Pro</string>
+    <string name="cd_upload_photo">Télécharger photo</string>
+    <string name="cd_edit_name">Modifier le nom</string>
+    <string name="cd_profile_picture">Photo de profil</string>
+
+    <!-- Account Screen - Body Stats -->
+    <string name="stat_weight">Poids</string>
+    <string name="stat_height">Taille</string>
+    <string name="stat_experience">Expérience</string>
+    <string name="track_more_measurements">Suivre plus de mesures</string>
+    <string name="no_measurements_recorded">Aucune mesure enregistrée</string>
+    <string name="update_measurements">Mettre à jour les mesures</string>
+    <string name="add_measurements">Ajouter des mesures</string>
+    <string name="cd_collapse">Réduire</string>
+    <string name="cd_expand">Développer</string>
+
+    <!-- Account Screen - Body Measurements -->
+    <string name="measurement_neck">Cou</string>
+    <string name="measurement_shoulders">Épaules</string>
+    <string name="measurement_chest">Poitrine</string>
+    <string name="measurement_arms">Bras</string>
+    <string name="measurement_forearms">Avant-bras</string>
+    <string name="measurement_waist">Taille</string>
+    <string name="measurement_hips">Hanches</string>
+    <string name="measurement_glutes">Fessiers</string>
+    <string name="measurement_legs">Jambes</string>
+    <string name="measurement_calves">Mollets</string>
+
+    <!-- Account Screen - Nutrition Goals -->
+    <string name="macro_kcal">kcal</string>
+    <string name="macro_protein">Protéines</string>
+    <string name="macro_carbs">Glucides</string>
+    <string name="macro_fat">Lipides</string>
+    <string name="auto_calculate_from_profile">Calculer automatiquement depuis le profil</string>
+    <string name="complete_profile_hint">Complétez votre profil (âge, sexe, activité) pour le calcul automatique</string>
+    <string name="tdee_format">TDEE: %d kcal</string>
+
+    <!-- Account Screen - Primary Sport -->
+    <string name="training_focus">Focus d\'entraînement</string>
+    <string name="focus_strength">Force</string>
+    <string name="focus_endurance">Endurance</string>
+    <string name="focus_speed">Vitesse</string>
+    <string name="focus_mobility">Mobilité</string>
+    <string name="key_exercises">Exercices clés</string>
+    <string name="status_active">Actif</string>
+    <string name="no_sport_selected">Aucun sport sélectionné</string>
+    <string name="complete_onboarding_hint">Terminez l\'intégration pour définir votre sport principal</string>
+
+    <!-- Account Screen - Settings -->
+    <string name="setting_theme">Thème</string>
+    <string name="theme_dark">Mode sombre</string>
+    <string name="theme_light">Mode clair</string>
+    <string name="setting_units">Unités</string>
+    <string name="units_metric">Métrique (kg, cm)</string>
+    <string name="units_imperial">Impérial (lbs, inch)</string>
+    <string name="setting_workout_duration">Durée d\'entraînement cible</string>
+    <string name="duration_minutes_format">%d minutes</string>
+    <string name="not_set">Non défini</string>
+    <string name="setting_notifications">Notifications</string>
+    <string name="status_enabled">Activé</string>
+    <string name="status_disabled">Désactivé</string>
+    <string name="setting_referral_code">Code de parrainage</string>
+    <string name="referral_code_hint">Entrez un code pour soutenir votre coach ou salle</string>
+    <string name="setting_about">À propos</string>
+    <string name="version_format">Version %s</string>
+    <string name="setting_help">Aide &amp; Support</string>
+    <string name="help_subtitle">Obtenir de l\'aide</string>
+    <string name="setting_invite">Inviter des amis</string>
+    <string name="invite_subtitle">Partager Naya avec des amis</string>
+    <string name="setting_language">Langue</string>
+
+    <!-- Account Screen - Logout -->
+    <string name="action_logout">Déconnexion</string>
+    <string name="cd_logout">Déconnexion</string>
+
+    <!-- Account Screen - Snackbar Messages -->
+    <string name="upload_success">Photo de profil mise à jour avec succès!</string>
+    <string name="upload_error_format">Échec du téléchargement: %s</string>
+
+    <!-- Account Screen - Share Intent -->
+    <string name="share_subject">Découvrez Naya!</string>
+    <string name="share_text">Hey! J\'utilise Naya pour suivre mon bien-être. Tu devrais l\'essayer aussi! Télécharge-le ici: https://naya.app/download</string>
+    <string name="share_chooser_title">Inviter un ami</string>
+
+    <!-- Language Settings -->
+    <string name="language_german">Allemand</string>
+    <string name="language_english">Anglais</string>
+    <string name="language_french">Français</string>
+    <string name="language_system">Langue système</string>
+
+    <!-- Common -->
+    <string name="placeholder_value">--</string>
+    <string name="cd_edit">Modifier</string>
+</resources>

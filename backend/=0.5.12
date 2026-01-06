@@ -1,0 +1,16 @@
+Collecting lap
+  Using cached lap-0.5.12-cp314-cp314-macosx_15_0_arm64.whl
+Collecting numpy>=1.21.6 (from lap)
+  Using cached numpy-2.3.5-cp314-cp314-macosx_14_0_arm64.whl.metadata (62 kB)
+Using cached numpy-2.3.5-cp314-cp314-macosx_14_0_arm64.whl (5.1 MB)
+Installing collected packages: numpy, lap
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.3.5
+    Uninstalling numpy-2.3.5:
+      Successfully uninstalled numpy-2.3.5
+  Attempting uninstall: lap
+    Found existing installation: lap 0.5.12
+    Uninstalling lap-0.5.12:
+      Successfully uninstalled lap-0.5.12
+
+Successfully installed lap-0.5.12 numpy-2.3.5

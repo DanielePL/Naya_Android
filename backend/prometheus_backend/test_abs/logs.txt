@@ -1,0 +1,6 @@
+
+
+---------------------------------------------------------------------
+Processing /Users/danielepauli/AndroidStudioProjects/Prometheus/backend/sports2d_service/uploads/20251119_192001_20251119_191949.mp4 from 0.0 to 7.63 seconds
+On Wednesday 19. November 2025, 19:29:24
+---------------------------------------------------------------------

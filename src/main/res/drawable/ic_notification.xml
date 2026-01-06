@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Simple circle outline for notification -->
+    <path
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM12,20c-4.41,0 -8,-3.59 -8,-8s3.59,-8 8,-8 8,3.59 8,8 -3.59,8 -8,8z"
+        android:fillColor="#FFFFFF"/>
+
+    <!-- Simple woman figure -->
+    <path
+        android:pathData="M12,6a1.5,1.5 0,1 1,0 3a1.5,1.5 0,1 1,0 -3"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M12,10 L12,15 M12,11 L9,9 M12,11 L15,9 M12,15 L10,18 M12,15 L14,18"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"/>
+
+</vector>

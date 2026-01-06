@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Temporary files
+uploads/*
+outputs/*
+*.tmp
+
+# Git
+.git/
+.gitignore
+
+# Nix/Railway specific (not needed for Docker)
+nixpacks.toml
+setup_libs.sh
+railway.json
+
+# Documentation
+*.md
+!README.md

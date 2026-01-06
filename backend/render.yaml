@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: prometheus-backend
+    runtime: docker
+    region: frankfurt  # EU region
+    plan: free  # or starter
+    rootDir: Prometheus_V1/backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

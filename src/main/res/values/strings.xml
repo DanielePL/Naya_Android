@@ -1,0 +1,105 @@
+<resources>
+    <string name="app_name">Naya</string>
+
+    <!-- Account Screen - Section Headers -->
+    <string name="section_my_sport">MY SPORT</string>
+    <string name="section_body_stats">BODY STATS</string>
+    <string name="section_nutrition_goals">NUTRITION GOALS</string>
+    <string name="section_settings">SETTINGS</string>
+
+    <!-- Account Screen - Profile Header -->
+    <string name="member_title">Naya Member</string>
+    <string name="tier_pro">Pro</string>
+    <string name="cd_upload_photo">Upload photo</string>
+    <string name="cd_edit_name">Edit Name</string>
+    <string name="cd_profile_picture">Profile picture</string>
+
+    <!-- Account Screen - Body Stats -->
+    <string name="stat_weight">Weight</string>
+    <string name="stat_height">Height</string>
+    <string name="stat_experience">Experience</string>
+    <string name="track_more_measurements">Track More Measurements</string>
+    <string name="no_measurements_recorded">No measurements recorded yet</string>
+    <string name="update_measurements">Update Measurements</string>
+    <string name="add_measurements">Add Measurements</string>
+    <string name="cd_collapse">Collapse</string>
+    <string name="cd_expand">Expand</string>
+
+    <!-- Account Screen - Body Measurements -->
+    <string name="measurement_neck">Neck</string>
+    <string name="measurement_shoulders">Shoulders</string>
+    <string name="measurement_chest">Chest</string>
+    <string name="measurement_arms">Arms</string>
+    <string name="measurement_forearms">Forearms</string>
+    <string name="measurement_waist">Waist</string>
+    <string name="measurement_hips">Hips</string>
+    <string name="measurement_glutes">Glutes</string>
+    <string name="measurement_legs">Legs</string>
+    <string name="measurement_calves">Calves</string>
+
+    <!-- Account Screen - Nutrition Goals -->
+    <string name="macro_kcal">kcal</string>
+    <string name="macro_protein">Protein</string>
+    <string name="macro_carbs">Carbs</string>
+    <string name="macro_fat">Fat</string>
+    <string name="auto_calculate_from_profile">Auto-Calculate from Profile</string>
+    <string name="complete_profile_hint">Complete your profile (age, gender, activity) to auto-calculate goals</string>
+    <string name="tdee_format">TDEE: %d kcal</string>
+
+    <!-- Account Screen - Primary Sport -->
+    <string name="training_focus">Training Focus</string>
+    <string name="focus_strength">Strength</string>
+    <string name="focus_endurance">Endurance</string>
+    <string name="focus_speed">Speed</string>
+    <string name="focus_mobility">Mobility</string>
+    <string name="key_exercises">Key Exercises</string>
+    <string name="status_active">Active</string>
+    <string name="no_sport_selected">No sport selected</string>
+    <string name="complete_onboarding_hint">Complete onboarding to set your primary sport</string>
+
+    <!-- Account Screen - Settings -->
+    <string name="setting_language">Language</string>
+    <string name="setting_theme">Theme</string>
+    <string name="theme_dark">Dark Mode</string>
+    <string name="theme_light">Light Mode</string>
+    <string name="setting_units">Units</string>
+    <string name="units_metric">Metric (kg, cm)</string>
+    <string name="units_imperial">Imperial (lbs, inch)</string>
+    <string name="setting_workout_duration">Workout Duration Target</string>
+    <string name="duration_minutes_format">%d minutes</string>
+    <string name="not_set">Not set</string>
+    <string name="setting_notifications">Notifications</string>
+    <string name="status_enabled">Enabled</string>
+    <string name="status_disabled">Disabled</string>
+    <string name="setting_referral_code">Partner Referral Code</string>
+    <string name="referral_code_hint">Enter a code to support your coach or gym</string>
+    <string name="setting_about">About</string>
+    <string name="version_format">Version %s</string>
+    <string name="setting_help">Help &amp; Support</string>
+    <string name="help_subtitle">Get assistance</string>
+    <string name="setting_invite">Invite Friends</string>
+    <string name="invite_subtitle">Share Naya with friends</string>
+
+    <!-- Account Screen - Logout -->
+    <string name="action_logout">Log Out</string>
+    <string name="cd_logout">Logout</string>
+
+    <!-- Account Screen - Snackbar Messages -->
+    <string name="upload_success">Profile picture updated successfully!</string>
+    <string name="upload_error_format">Failed to upload: %s</string>
+
+    <!-- Account Screen - Share Intent -->
+    <string name="share_subject">Check out Naya!</string>
+    <string name="share_text">Hey! I\'ve been using Naya to track my wellness journey. You should try it too! Download it here: https://naya.app/download</string>
+    <string name="share_chooser_title">Invite a Friend</string>
+
+    <!-- Language Settings -->
+    <string name="language_german">German</string>
+    <string name="language_english">English</string>
+    <string name="language_french">French</string>
+    <string name="language_system">System Language</string>
+
+    <!-- Common -->
+    <string name="placeholder_value">--</string>
+    <string name="cd_edit">Edit</string>
+</resources>

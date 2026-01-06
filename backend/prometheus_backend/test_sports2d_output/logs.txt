@@ -1,0 +1,6 @@
+
+
+---------------------------------------------------------------------
+Processing /Users/danielepauli/AndroidStudioProjects/Prometheus/backend/sports2d_service/uploads/test_normalized.mp4 from 0.0 to 7.63 seconds
+On Thursday 20. November 2025, 05:33:20
+---------------------------------------------------------------------
