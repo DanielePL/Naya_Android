@@ -140,10 +140,11 @@ object SubscriptionManager {
             Log.d(TAG, "Restored trial end date: $savedTrialEnd (${getRemainingTrialDays()} days remaining)")
         }
 
-        // Restore dev mode (default false for production)
-        val savedDevMode = prefs?.getBoolean(KEY_DEV_MODE, false) ?: false
+        // Restore dev mode (default TRUE for development builds)
+        // TODO: Set default to false for production release
+        val savedDevMode = prefs?.getBoolean(KEY_DEV_MODE, true) ?: true
         _devModeEnabled.value = savedDevMode
-        Log.d(TAG, "Restored dev mode: $savedDevMode")
+        Log.d(TAG, "🔓 Dev mode: $savedDevMode (all features unlocked)")
 
         // Restore subscription tier
         val savedTier = prefs?.getString(KEY_TIER, null)
