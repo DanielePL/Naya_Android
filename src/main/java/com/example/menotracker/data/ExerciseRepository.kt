@@ -15,14 +15,14 @@ object ExerciseRepository {
     // ═══════════════════════════════════════════════════════════════
     // ENV FLAG: Quick rollback between old and new schema
     // ═══════════════════════════════════════════════════════════════
-    private const val USE_NEW_SCHEMA = true  // Set to false for instant rollback to "exercises"
-    private const val USE_EXERCISE_VIEW = true  // Set to true to use exercise_view with technique_sections joined
+    private const val USE_NEW_SCHEMA = false  // Set to true for exercises_new table
+    private const val USE_EXERCISE_VIEW = false  // exercise_view doesn't exist yet
 
     // Table name - automatically switches based on flags
     private val EXERCISES_TABLE = when {
-        USE_EXERCISE_VIEW -> "exercise_view"  // View with technique_sections joined
+        USE_EXERCISE_VIEW -> "exercise_view"  // View with technique_sections joined (not yet created)
         USE_NEW_SCHEMA -> "exercises_new"
-        else -> "exercises"
+        else -> "exercises"  // Default: use main exercises table
     }
     private const val RECOMMENDATIONS_TABLE = "exercise_recommendations"
 

@@ -306,12 +306,12 @@ object WorkoutTemplateRepository {
                     .sortedBy { it.orderIndex }
 
                 // Load exercise details for each exercise
-                // Try exercises_new first, then fallback to exercise_view (which includes old exercises)
+                // Try exercises table (fallback from exercises_new if needed)
                 val exercisesWithSets = exercises.mapNotNull { exercise ->
-                    // Try to fetch exercise data - first from exercises_new, then fallback
+                    // Try to fetch exercise data from exercises table
                     val exerciseDetails = try {
                         SupabaseClient.client
-                            .from("exercises_new")
+                            .from("exercises")
                             .select() {
                                 filter {
                                     eq("id", exercise.exerciseId)
@@ -320,21 +320,7 @@ object WorkoutTemplateRepository {
                             .decodeList<Exercise>()
                             .firstOrNull()
                     } catch (e: Exception) {
-                        null
-                    } ?: try {
-                        // Fallback to exercise_view for legacy exercises
-                        Log.d(TAG, "⚠️ Exercise ${exercise.exerciseId} not in exercises_new, trying exercise_view")
-                        SupabaseClient.client
-                            .from("exercise_view")
-                            .select() {
-                                filter {
-                                    eq("id", exercise.exerciseId)
-                                }
-                            }
-                            .decodeList<Exercise>()
-                            .firstOrNull()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "❌ Could not find exercise ${exercise.exerciseId} in any table")
+                        Log.e(TAG, "❌ Could not find exercise ${exercise.exerciseId}: ${e.message}")
                         null
                     }
 
@@ -510,7 +496,7 @@ object WorkoutTemplateRepository {
                 if (missingIds.isNotEmpty()) {
                     Log.d(TAG, "Step 4: Fetching ${missingIds.size} exercise details from DB")
                     val fetchedExercises = SupabaseClient.client
-                        .from("exercise_view")
+                        .from("exercises")
                         .select()
                         .decodeList<Exercise>()
                         .filter { it.id in missingIds }

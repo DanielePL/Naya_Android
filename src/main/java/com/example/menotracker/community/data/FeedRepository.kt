@@ -35,7 +35,7 @@ object FeedRepository {
 
     /**
      * Get feed for current user (posts from followed users + own posts)
-     * Uses RPC function for optimized query
+     * Uses RPC function for optimized query, with fallback to direct table query
      */
     suspend fun getFeed(
         limit: Int = DEFAULT_PAGE_SIZE,
@@ -47,14 +47,20 @@ object FeedRepository {
 
         return try {
             withContext(Dispatchers.IO) {
-                val params = buildJsonObject {
-                    put("p_limit", JsonPrimitive(limit))
-                    put("p_offset", JsonPrimitive(offset))
+                val posts = try {
+                    // Try RPC function first
+                    val params = buildJsonObject {
+                        put("p_limit", JsonPrimitive(limit))
+                        put("p_offset", JsonPrimitive(offset))
+                    }
+                    SupabaseClient.client.postgrest
+                        .rpc("get_community_feed", params)
+                        .decodeList<FeedPost>()
+                } catch (rpcError: Exception) {
+                    // Fallback: Query table directly if RPC doesn't exist
+                    Log.w(TAG, "⚠️ RPC get_community_feed not found, using fallback query")
+                    getFeedFallback(limit, offset)
                 }
-
-                val posts = SupabaseClient.client.postgrest
-                    .rpc("get_community_feed", params)
-                    .decodeList<FeedPost>()
 
                 // Debug: Log video_urls for each post
                 posts.forEach { post ->
@@ -76,8 +82,46 @@ object FeedRepository {
     }
 
     /**
+     * Fallback feed query when RPC function doesn't exist
+     */
+    private suspend fun getFeedFallback(limit: Int, offset: Int): List<FeedPost> {
+        // Get recent public posts
+        val posts = SupabaseClient.client
+            .from(POSTS_TABLE)
+            .select {
+                order("created_at", io.github.jan.supabase.postgrest.query.Order.DESCENDING)
+                limit(limit.toLong())
+            }
+            .decodeList<CommunityPost>()
+
+        // Convert to FeedPost (without user enrichment for now)
+        return posts.map { post ->
+            FeedPost(
+                id = post.id,
+                userId = post.userId,
+                userName = null,
+                userAvatar = null,
+                workoutName = post.workoutName,
+                totalVolumeKg = post.totalVolumeKg,
+                totalSets = post.totalSets,
+                totalReps = post.totalReps,
+                durationMinutes = post.durationMinutes,
+                prsAchieved = post.prsAchieved,
+                prExercises = post.prExercises,
+                caption = post.caption,
+                imageUrls = post.imageUrls,
+                videoUrls = post.videoUrls,
+                likesCount = post.likesCount,
+                commentsCount = post.commentsCount,
+                createdAt = post.createdAt,
+                isLiked = false
+            )
+        }
+    }
+
+    /**
      * Get discover feed (public posts from non-followed users)
-     * Uses RPC function for optimized query
+     * Uses RPC function for optimized query, with fallback to direct table query
      */
     suspend fun getDiscoverFeed(
         limit: Int = DEFAULT_PAGE_SIZE,
@@ -89,14 +133,20 @@ object FeedRepository {
 
         return try {
             withContext(Dispatchers.IO) {
-                val params = buildJsonObject {
-                    put("p_limit", JsonPrimitive(limit))
-                    put("p_offset", JsonPrimitive(offset))
+                val posts = try {
+                    // Try RPC function first
+                    val params = buildJsonObject {
+                        put("p_limit", JsonPrimitive(limit))
+                        put("p_offset", JsonPrimitive(offset))
+                    }
+                    SupabaseClient.client.postgrest
+                        .rpc("get_discover_feed", params)
+                        .decodeList<FeedPost>()
+                } catch (rpcError: Exception) {
+                    // Fallback: Use same fallback as feed (shows recent public posts)
+                    Log.w(TAG, "⚠️ RPC get_discover_feed not found, using fallback query")
+                    getFeedFallback(limit, offset)
                 }
-
-                val posts = SupabaseClient.client.postgrest
-                    .rpc("get_discover_feed", params)
-                    .decodeList<FeedPost>()
 
                 // Debug: Log video_urls for each post
                 posts.forEach { post ->
