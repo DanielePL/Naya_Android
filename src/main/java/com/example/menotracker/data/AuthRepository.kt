@@ -82,6 +82,17 @@ class AuthRepository(private val context: Context) {
 
     fun getCurrentUser(): UserInfo? = auth.currentUserOrNull()
 
+    /**
+     * Check admin status for current user (call on app startup)
+     */
+    fun checkAdminStatusForCurrentUser() {
+        val currentUser = auth.currentUserOrNull()
+        if (currentUser != null) {
+            Log.d(TAG, "🔍 Checking admin status for existing session: ${currentUser.email}")
+            AdminManager.checkAdminStatus(currentUser.id, currentUser.email)
+        }
+    }
+
     // ========== EMAIL/PASSWORD SIGN UP ==========
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
@@ -128,7 +139,11 @@ class AuthRepository(private val context: Context) {
             // Disable guest mode
             context.authDataStore.edit { it[GUEST_MODE_KEY] = "false" }
 
-            Log.d(TAG, "✅ Login successful. User ID: ${auth.currentUserOrNull()?.id}")
+            // Check admin status
+            val currentUser = auth.currentUserOrNull()
+            AdminManager.checkAdminStatus(currentUser?.id, currentUser?.email)
+
+            Log.d(TAG, "✅ Login successful. User ID: ${currentUser?.id}")
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e(TAG, "❌ Login failed: ${e.message}")
@@ -173,6 +188,9 @@ class AuthRepository(private val context: Context) {
 
             // Sign out from Supabase
             auth.signOut()
+
+            // Clear admin status
+            AdminManager.clearAdminStatus()
 
             // Clear guest mode
             context.authDataStore.edit { it[GUEST_MODE_KEY] = "false" }
@@ -234,6 +252,9 @@ class AuthRepository(private val context: Context) {
 
             // Disable guest mode
             context.authDataStore.edit { it[GUEST_MODE_KEY] = "false" }
+
+            // Check admin status
+            AdminManager.checkAdminStatus(userInfo.id, userInfo.email)
 
             Log.d(TAG, "✅ Session restored successfully. User ID: ${userInfo.id}")
             Result.success(Unit)

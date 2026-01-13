@@ -82,6 +82,12 @@ data class ChatContext(
     @SerializedName("selected_workout_id")
     val selectedWorkoutId: String? = null,
 
+    // User Profile
+    @SerializedName("user_name")
+    val userName: String? = null,
+    @SerializedName("user_age")
+    val userAge: Int? = null,
+
     // Menopause-specific context for NAYA Coach
     @SerializedName("menopause_stage")
     val menopauseStage: String? = null,  // "perimenopause", "menopause", "postmenopause"
@@ -89,10 +95,46 @@ data class ChatContext(
     val primarySymptoms: List<String>? = null,  // ["hot_flashes", "sleep_issues", "mood_changes"]
     @SerializedName("wellness_goals")
     val wellnessGoals: List<String>? = null,  // ["better_sleep", "manage_symptoms", "stay_active"]
+
+    // Recent symptom data (last 7 days)
     @SerializedName("recent_symptoms")
     val recentSymptoms: List<RecentSymptom>? = null,  // Last 7 days symptom log
-    @SerializedName("user_age")
-    val userAge: Int? = null
+
+    // Sleep data
+    @SerializedName("avg_sleep_hours")
+    val avgSleepHours: Float? = null,
+    @SerializedName("avg_sleep_quality")
+    val avgSleepQuality: Float? = null,
+    @SerializedName("sleep_interruptions")
+    val sleepInterruptions: Int? = null,
+
+    // Mood data
+    @SerializedName("dominant_mood")
+    val dominantMood: String? = null,
+    @SerializedName("mood_triggers")
+    val moodTriggers: List<String>? = null,
+
+    // Bone health data
+    @SerializedName("avg_calcium_mg")
+    val avgCalciumMg: Float? = null,
+    @SerializedName("avg_vitamin_d_iu")
+    val avgVitaminDIu: Float? = null,
+    @SerializedName("strength_training_days")
+    val strengthTrainingDays: Int? = null,
+
+    // Dietary info
+    @SerializedName("dietary_preferences")
+    val dietaryPreferences: List<String>? = null,
+    @SerializedName("food_allergies")
+    val foodAllergies: List<String>? = null,
+
+    // Active alerts / concerns
+    @SerializedName("active_concerns")
+    val activeConcerns: List<String>? = null,
+
+    // Full formatted context for system prompt
+    @SerializedName("wellness_context_summary")
+    val wellnessContextSummary: String? = null
 )
 
 /**

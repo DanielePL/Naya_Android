@@ -12,6 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -350,7 +352,7 @@ fun HealthDocumentUploadDialog(
 
                     // Notes Field
                     SectionHeader(
-                        icon = Icons.Default.Notes,
+                        icon = Icons.AutoMirrored.Filled.Notes,
                         title = "Notes",
                         subtitle = "Optional"
                     )
@@ -544,7 +546,7 @@ private fun getDocumentTypeIcon(type: HealthDocumentType): ImageVector {
         HealthDocumentType.LAB_RESULT -> Icons.Default.Biotech
         HealthDocumentType.ULTRASOUND -> Icons.Default.GraphicEq
         HealthDocumentType.MAMMOGRAM -> Icons.Default.MedicalServices
-        HealthDocumentType.OTHER -> Icons.Default.InsertDriveFile
+        HealthDocumentType.OTHER -> Icons.AutoMirrored.Filled.InsertDriveFile
     }
 }
 

@@ -44,6 +44,9 @@ import java.util.UUID
 import com.example.menotracker.ui.theme.*
 import com.example.menotracker.billing.Feature
 import com.example.menotracker.billing.FeatureGate
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.*
 
 // Design System - NAYA Wellness Colors
 private val nayaPrimary = NayaPrimary                // Violet #A78BFA (aufgehellt)
@@ -97,6 +100,11 @@ private fun AICoachScreenContent(
     val conversations by viewModel.conversations.collectAsState()
     val currentConversationId by viewModel.currentConversationId.collectAsState()
     val context = LocalContext.current
+
+    // Wellness context and alerts
+    val topAlert by viewModel.topAlert.collectAsState()
+    val recommendedQuickActions = viewModel.getRecommendedQuickActions()
+    val wellnessSummary = viewModel.getWellnessSummary()
 
     var messageText by remember { mutableStateOf("") }
     var attachments by remember { mutableStateOf<List<MessageAttachment>>(emptyList()) }
@@ -309,6 +317,23 @@ private fun AICoachScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // Proactive Alert Banner
+            AnimatedVisibility(
+                visible = topAlert != null,
+                enter = slideInVertically() + fadeIn(),
+                exit = slideOutVertically() + fadeOut()
+            ) {
+                topAlert?.let { alert ->
+                    ProactiveAlertBanner(
+                        alert = alert,
+                        onDismiss = { viewModel.dismissAlert(alert.id) },
+                        onAction = {
+                            viewModel.startProactiveChat(alert)
+                        }
+                    )
+                }
+            }
+
             // Messages List
             LazyColumn(
                 modifier = Modifier
@@ -356,6 +381,16 @@ private fun AICoachScreenContent(
                         LoadingBubble()
                     }
                 }
+            }
+
+            // Quick Actions Row - shown when few messages
+            if (messages.size <= 2 && !isLoading) {
+                QuickActionsRow(
+                    quickActions = recommendedQuickActions,
+                    onActionClick = { action ->
+                        viewModel.sendQuickAction(action, context)
+                    }
+                )
             }
 
             // Input Area - with padding for footer bar
@@ -1280,6 +1315,227 @@ private fun formatTimestamp(timestamp: Long): String {
         diff < 3600_000 -> "${diff / 60_000} min"
         diff < 86400_000 -> "${diff / 3600_000} hrs"
         else -> "${diff / 86400_000} days"
+    }
+}
+
+// ============================================================
+// PROACTIVE WELLNESS UI COMPONENTS
+// ============================================================
+
+/**
+ * Proactive Alert Banner - Shows important health alerts at top of chat
+ */
+@Composable
+private fun ProactiveAlertBanner(
+    alert: ProactiveAlert,
+    onDismiss: () -> Unit,
+    onAction: () -> Unit
+) {
+    val backgroundColor = when (alert.priority) {
+        AlertPriority.HIGH -> Color(0xFF7F1D1D).copy(alpha = 0.9f)  // Dark red
+        AlertPriority.MEDIUM -> Color(0xFF78350F).copy(alpha = 0.9f)  // Dark amber
+        AlertPriority.LOW -> Color(0xFF14532D).copy(alpha = 0.9f)  // Dark green
+    }
+
+    val accentColor = when (alert.priority) {
+        AlertPriority.HIGH -> Color(0xFFFCA5A5)  // Light red
+        AlertPriority.MEDIUM -> Color(0xFFFCD34D)  // Light amber
+        AlertPriority.LOW -> Color(0xFF86EFAC)  // Light green
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // Emoji indicator
+                    Text(
+                        text = alert.emoji,
+                        fontSize = 28.sp
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = alert.title,
+                            color = accentColor,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = alert.message,
+                            color = textWhite.copy(alpha = 0.9f),
+                            fontSize = 14.sp,
+                            lineHeight = 18.sp
+                        )
+                    }
+                }
+
+                // Dismiss button
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Dismiss",
+                        tint = textGray,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+            // Suggestion text
+            Text(
+                text = alert.suggestion,
+                color = textGray,
+                fontSize = 13.sp,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+            )
+
+            // Action button
+            Button(
+                onClick = onAction,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = accentColor.copy(alpha = 0.2f)
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = alert.actionText,
+                    color = accentColor,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Quick Actions Row - Contextual action chips based on user's wellness data
+ */
+@Composable
+private fun QuickActionsRow(
+    quickActions: List<AICoachViewModel.QuickAction>,
+    onActionClick: (AICoachViewModel.QuickAction) -> Unit
+) {
+    if (quickActions.isEmpty()) return
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Quick Actions",
+            color = textGray,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(quickActions) { action ->
+                QuickActionChip(
+                    action = action,
+                    onClick = { onActionClick(action) }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Individual Quick Action Chip
+ */
+@Composable
+private fun QuickActionChip(
+    action: AICoachViewModel.QuickAction,
+    onClick: () -> Unit
+) {
+    val chipColor = when (action) {
+        AICoachViewModel.QuickAction.SYMPTOMS -> Color(0xFFEF4444)  // Red
+        AICoachViewModel.QuickAction.SLEEP -> Color(0xFF3B82F6)  // Blue
+        AICoachViewModel.QuickAction.NUTRITION -> Color(0xFF10B981)  // Green
+        AICoachViewModel.QuickAction.RELAXATION -> nayaTeal
+        AICoachViewModel.QuickAction.EXERCISE -> nayaPrimary
+        AICoachViewModel.QuickAction.MOOD -> nayaPink
+    }
+
+    Surface(
+        onClick = onClick,
+        color = chipColor.copy(alpha = 0.15f),
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, chipColor.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = action.emoji,
+                fontSize = 16.sp
+            )
+            Text(
+                text = action.displayName,
+                color = textWhite,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+/**
+ * Wellness Context Chips - Shows what data the AI knows about
+ */
+@Composable
+private fun WellnessContextChips(
+    summary: String,
+    modifier: Modifier = Modifier
+) {
+    if (summary.isBlank() || summary == "No recent health data") return
+
+    val chips = summary.split(" | ")
+
+    LazyRow(
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(chips) { chip ->
+            Surface(
+                color = nayaPrimary.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = chip,
+                    color = nayaGlow,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
     }
 }
 

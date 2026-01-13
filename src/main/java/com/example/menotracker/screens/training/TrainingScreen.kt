@@ -92,7 +92,8 @@ fun TrainingScreen(
     onStartProgramWorkout: (String) -> Unit = {},
     onNavigateToPaywall: () -> Unit = {},
     onScanWorkout: () -> Unit = {},
-    onWorkoutDetail: (WorkoutTemplate) -> Unit = {} // New: Navigate to workout detail
+    onWorkoutDetail: (WorkoutTemplate) -> Unit = {}, // New: Navigate to workout detail
+    onNavigateToMindfulness: () -> Unit = {} // Mindfulness (Breathing + Meditation)
 ) {
     val scope = rememberCoroutineScope()
 
@@ -139,6 +140,14 @@ fun TrainingScreen(
                     onHistoryClick = onNavigateToHistory,
                     onProgramsClick = onNavigateToProgramDashboard,
                     onStatisticsClick = onNavigateToStatistics
+                )
+            }
+
+            // Mindfulness Quick Access Card
+            item {
+                MindfulnessQuickCard(
+                    onClick = onNavigateToMindfulness,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
 
@@ -1678,6 +1687,78 @@ private fun CoachAssignedWorkoutCard(
                     }
                 }
             }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MINDFULNESS QUICK ACCESS CARD
+// ═══════════════════════════════════════════════════════════════
+
+private val tealAccent = Color(0xFF14B8A6)
+
+@Composable
+private fun MindfulnessQuickCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        color = tealAccent.copy(alpha = 0.15f),
+        border = BorderStroke(1.dp, tealAccent.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Icon
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = tealAccent.copy(alpha = 0.2f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Spa,
+                    contentDescription = null,
+                    tint = tealAccent,
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .size(28.dp)
+                )
+            }
+
+            // Text content
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = "Mindfulness",
+                    color = textWhite,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontFamily = SpaceGrotesk
+                )
+                Text(
+                    text = "Breathing & Meditation",
+                    color = tealAccent,
+                    fontSize = 13.sp,
+                    fontFamily = Poppins
+                )
+            }
+
+            // Arrow
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Open",
+                tint = tealAccent,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }

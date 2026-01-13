@@ -53,6 +53,8 @@ import com.example.menotracker.ui.theme.NayaProtein
 import com.example.menotracker.ui.theme.NayaCarbs
 import com.example.menotracker.ui.theme.NayaFat
 import com.example.menotracker.ui.theme.glassCardAccent
+import com.example.menotracker.data.AdminManager
+import kotlinx.coroutines.launch
 import java.io.File
 
 // Design System - Using Theme Colors
@@ -73,7 +75,8 @@ fun AccountScreen(
     nutritionViewModel: com.example.menotracker.viewmodels.NutritionViewModel? = null,
     isDarkMode: Boolean = true,
     onThemeChange: (Boolean) -> Unit = {},
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {}
 ) {
     var showBodyStatsDialog by remember { mutableStateOf(false) }
     var showNameEditDialog by remember { mutableStateOf(false) }
@@ -367,6 +370,40 @@ fun AccountScreen(
                 )
             }
 
+            // Admin Panel Button (only visible for admins)
+            item {
+                val isAdmin by AdminManager.isAdmin.collectAsState()
+                if (isAdmin) {
+                    OutlinedButton(
+                        onClick = onNavigateToAdmin,
+                        border = BorderStroke(1.5.dp, NayaPrimary.copy(alpha = 0.6f)),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AdminPanelSettings,
+                                contentDescription = "Admin Panel",
+                                tint = NayaPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = "Admin Panel",
+                                color = NayaPrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
+
             // Logout Button
             item {
                 OutlinedButton(
@@ -417,12 +454,11 @@ fun AccountScreen(
             currentWeight = userWeight,
             currentHeight = userHeight,
             currentAge = userProfile?.age?.toString() ?: "",
-            currentGender = userProfile?.gender,
             currentActivityLevel = userProfile?.activityLevel,
             currentYears = userYears,
             onDismiss = { showBodyStatsDialog = false },
-            onSave = { name, weight, height, age, gender, activityLevel, years ->
-                android.util.Log.d("AccountScreen", "🟢 Dialog Save clicked: name='$name', weight='$weight', height='$height', age='$age', gender=$gender, activity=$activityLevel, years='$years'")
+            onSave = { name, weight, height, age, activityLevel, years ->
+                android.util.Log.d("AccountScreen", "🟢 Dialog Save clicked: name='$name', weight='$weight', height='$height', age='$age', activity=$activityLevel, years='$years'")
                 val weightValue = weight.toDoubleOrNull()
                 val heightValue = height.toDoubleOrNull()
                 val ageValue = age.toIntOrNull()
@@ -434,7 +470,6 @@ fun AccountScreen(
                     weight = weightValue,
                     height = heightValue,
                     age = ageValue,
-                    gender = gender,
                     activityLevel = activityLevel,
                     years = yearsValue
                 )
@@ -545,6 +580,52 @@ fun AccountScreen(
             onSelect = { languageCode ->
                 viewModel.setLanguage(languageCode)
                 showLanguageDialog = false
+            }
+        )
+    }
+
+    // Menopause Profile Dialog
+    if (showMenopauseProfileDialog) {
+        MenopauseProfileDialog(
+            currentProfile = menopauseProfile,
+            onDismiss = { showMenopauseProfileDialog = false },
+            onSave = { stage, lastPeriodDate, hrtStatus, primarySymptoms ->
+                userProfile?.id?.let { userId ->
+                    kotlinx.coroutines.MainScope().launch {
+                        MenopauseProfileRepository.saveProfile(
+                            userId = userId,
+                            stage = stage,
+                            lastPeriodDate = lastPeriodDate,
+                            hrtStatus = hrtStatus,
+                            primarySymptoms = primarySymptoms
+                        )
+                    }
+                }
+                showMenopauseProfileDialog = false
+            }
+        )
+    }
+
+    // Health Document Upload Dialog
+    if (showDocumentUploadDialog) {
+        HealthDocumentUploadDialog(
+            onDismiss = { showDocumentUploadDialog = false },
+            onUpload = { file, documentType, title, documentDate, notes ->
+                userProfile?.id?.let { userId ->
+                    kotlinx.coroutines.MainScope().launch {
+                        HealthDocumentRepository.uploadDocument(
+                            userId = userId,
+                            file = file,
+                            documentType = documentType,
+                            title = title,
+                            documentDate = documentDate,
+                            notes = notes
+                        )
+                        // Clean up temp file after upload
+                        file.delete()
+                    }
+                }
+                showDocumentUploadDialog = false
             }
         )
     }
@@ -1019,7 +1100,6 @@ fun NutritionGoalsCard(
     val canCalculateTDEE = userProfile?.weight != null &&
                            userProfile.height != null &&
                            userProfile.age != null &&
-                           userProfile.gender != null &&
                            userProfile.activityLevel != null
 
     Surface(
@@ -1167,7 +1247,7 @@ fun NutritionGoalsCard(
             } else {
                 // Show hint to complete profile
                 Text(
-                    text = "Complete your profile (age, gender, activity) to auto-calculate goals",
+                    text = "Complete your profile (age, weight, activity) to auto-calculate goals",
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     fontSize = 11.sp,
                     modifier = Modifier.fillMaxWidth()

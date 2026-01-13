@@ -110,6 +110,8 @@ import com.example.menotracker.screens.mindfulness.MindfulnessScreen
 import com.example.menotracker.screens.meditation.MeditationScreen
 import com.example.menotracker.screens.meditation.MeditationSessionScreen
 import com.example.menotracker.screens.meditation.SoundscapeScreen
+import com.example.menotracker.screens.admin.AdminContentScreen
+import com.example.menotracker.data.AdminManager
 import com.example.menotracker.data.models.BreathingExerciseType
 import com.example.menotracker.data.models.MeditationType
 import com.example.menotracker.util.LocaleHelper
@@ -674,6 +676,9 @@ sealed class Screen(val route: String, val title: String, val icon: androidx.com
         fun createRoute(meditationType: MeditationType) = "meditation_session/${meditationType.name}"
     }
     object Soundscape : Screen("soundscape", "Soundscape", Icons.Default.Tune)
+
+    // Admin Screen (only accessible to admins)
+    object AdminContent : Screen("admin_content", "Admin", Icons.Default.AdminPanelSettings)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -980,6 +985,9 @@ fun MainScreen(
                     },
                     onScanWorkout = {
                         navController.navigate(Screen.WodScanner.route)
+                    },
+                    onNavigateToMindfulness = {
+                        navController.navigate(Screen.Mindfulness.route)
                     }
                 )
             }
@@ -1288,13 +1296,26 @@ fun MainScreen(
                     nutritionViewModel = nutritionViewModel,
                     isDarkMode = isDarkMode,
                     onThemeChange = onThemeChange,
-                    onLogout = onLogout
+                    onLogout = onLogout,
+                    onNavigateToAdmin = {
+                        navController.navigate(Screen.AdminContent.route)
+                    }
                 )
             }
 
             // Campus Screen
             composable(Screen.Campus.route) {
                 CampusScreen()
+            }
+
+            // Admin Content Screen (only for admins)
+            composable(Screen.AdminContent.route) {
+                AdminContentScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToWorkoutBuilder = {
+                        navController.navigate(Screen.WorkoutBuilder.route)
+                    }
+                )
             }
 
             // Training Statistics Screen

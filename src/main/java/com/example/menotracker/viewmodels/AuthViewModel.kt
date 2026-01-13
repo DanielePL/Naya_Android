@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.menotracker.data.AdminManager
 import com.example.menotracker.data.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +30,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     val currentUserEmail: StateFlow<String?> = authRepository.currentUserEmail
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    // Admin State (exposed from AdminManager)
+    val isAdmin: StateFlow<Boolean> = AdminManager.isAdmin
+
+    init {
+        // Check admin status for existing session on app startup
+        authRepository.checkAdminStatusForCurrentUser()
+    }
 
     // UI State
     private val _isLoading = MutableStateFlow(false)

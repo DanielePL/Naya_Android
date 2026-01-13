@@ -20,7 +20,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.menotracker.data.models.ActivityLevel
-import com.example.menotracker.data.models.Gender
 import com.example.menotracker.ui.theme.NayaPrimary
 import com.example.menotracker.ui.theme.NayaOrangeGlow
 
@@ -37,17 +36,15 @@ fun BodyStatsDialog(
     currentWeight: String,
     currentHeight: String,
     currentAge: String,
-    currentGender: Gender?,
     currentActivityLevel: ActivityLevel?,
     currentYears: String,
     onDismiss: () -> Unit,
-    onSave: (name: String, weight: String, height: String, age: String, gender: Gender?, activityLevel: ActivityLevel?, years: String) -> Unit
+    onSave: (name: String, weight: String, height: String, age: String, activityLevel: ActivityLevel?, years: String) -> Unit
 ) {
     var name by remember { mutableStateOf(currentName) }
     var weight by remember { mutableStateOf(currentWeight) }
     var height by remember { mutableStateOf(currentHeight) }
     var age by remember { mutableStateOf(currentAge) }
-    var gender by remember { mutableStateOf(currentGender) }
     var activityLevel by remember { mutableStateOf(currentActivityLevel) }
     var years by remember { mutableStateOf(currentYears) }
 
@@ -97,47 +94,6 @@ fun BodyStatsDialog(
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
                 )
-
-                // Gender Selection
-                Text(
-                    text = "Gender",
-                    color = textGray,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Gender.entries.forEach { g ->
-                        Surface(
-                            onClick = { gender = g },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (gender == g) orangePrimary.copy(alpha = 0.2f) else cardBackground,
-                            border = if (gender == g) BorderStroke(1.5.dp, orangePrimary) else null
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = if (g == Gender.MALE) Icons.Default.Male else Icons.Default.Female,
-                                    contentDescription = null,
-                                    tint = if (gender == g) orangePrimary else textGray,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Text(
-                                    text = g.displayName,
-                                    color = if (gender == g) orangePrimary else textGray,
-                                    fontWeight = if (gender == g) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-                        }
-                    }
-                }
 
                 // Age and Weight Row
                 Row(
@@ -316,7 +272,7 @@ fun BodyStatsDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onSave(name, weight, height, age, gender, activityLevel, years) },
+                onClick = { onSave(name, weight, height, age, activityLevel, years) },
                 enabled = name.isNotEmpty(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = orangePrimary

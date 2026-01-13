@@ -13,7 +13,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.menotracker.onboarding.data.*
 import com.example.menotracker.data.AuthRepository
 import com.example.menotracker.data.UserProfileRepository
+import com.example.menotracker.data.repository.MenopauseProfileRepository
 import com.example.menotracker.data.models.UserProfile
+import com.example.menotracker.data.models.MenopauseStage
+import com.example.menotracker.data.models.MenopauseSymptomType
+import com.example.menotracker.data.models.HRTStatus
 import com.example.menotracker.data.models.PersonalRecord
 import com.example.menotracker.data.models.GoalRecord
 import com.example.menotracker.data.models.ActivityLevel
@@ -1011,7 +1015,7 @@ class OnboardingViewModel : ViewModel() {
             // Create updated profile
             val updatedProfile = UserProfile(
                 id = userId,
-                name = existingProfile?.name ?: "Champion",
+                name = answers.userName ?: existingProfile?.name ?: "Champion",
                 weight = answers.currentPRs.bodyweightKg?.toDouble() ?: existingProfile?.weight,
                 height = existingProfile?.height,
                 age = answers.age ?: existingProfile?.age,
@@ -1046,12 +1050,59 @@ class OnboardingViewModel : ViewModel() {
                 dietaryPreferences = answers.dietaryPreferences.map { it.name },
                 foodAllergies = answers.foodAllergies.map { it.name },
                 foodDislikes = answers.foodDislikes,
-                customAllergyNote = answers.customAllergyNote
+                customAllergyNote = answers.customAllergyNote,
+                // Menopause wellness fields from onboarding
+                menopauseStage = answers.menopauseStage?.name?.lowercase(),
+                primarySymptoms = answers.primarySymptoms.map { it.name.lowercase() },
+                wellnessGoals = answers.menopauseGoals.map { it.name.lowercase() }
             )
 
             val result = UserProfileRepository.updateProfile(updatedProfile)
             if (result.isSuccess) {
                 Log.d(TAG, "✅ Onboarding data saved to UserProfile successfully")
+
+                // Also create MenopauseProfile if menopause data was collected
+                if (answers.menopauseStage != null || answers.primarySymptoms.isNotEmpty()) {
+                    try {
+                        // Map OnboardingMenopauseStage to MenopauseStage enum
+                        val stage = when (answers.menopauseStage) {
+                            OnboardingMenopauseStage.PREMENOPAUSE -> MenopauseStage.PREMENOPAUSE
+                            OnboardingMenopauseStage.EARLY_PERIMENOPAUSE -> MenopauseStage.EARLY_PERIMENOPAUSE
+                            OnboardingMenopauseStage.LATE_PERIMENOPAUSE -> MenopauseStage.LATE_PERIMENOPAUSE
+                            OnboardingMenopauseStage.MENOPAUSE -> MenopauseStage.MENOPAUSE
+                            OnboardingMenopauseStage.POSTMENOPAUSE -> MenopauseStage.POSTMENOPAUSE
+                            OnboardingMenopauseStage.UNSURE, null -> MenopauseStage.PREMENOPAUSE
+                        }
+
+                        // Map OnboardingSymptom to MenopauseSymptomType
+                        val symptoms = answers.primarySymptoms.mapNotNull { symptom ->
+                            when (symptom) {
+                                OnboardingSymptom.HOT_FLASHES -> MenopauseSymptomType.HOT_FLASH
+                                OnboardingSymptom.NIGHT_SWEATS -> MenopauseSymptomType.NIGHT_SWEAT
+                                OnboardingSymptom.SLEEP_ISSUES -> MenopauseSymptomType.SLEEP_ISSUE
+                                OnboardingSymptom.MOOD_SWINGS -> MenopauseSymptomType.MOOD_SWING
+                                OnboardingSymptom.FATIGUE -> MenopauseSymptomType.FATIGUE
+                                OnboardingSymptom.BRAIN_FOG -> MenopauseSymptomType.BRAIN_FOG
+                                OnboardingSymptom.WEIGHT_GAIN -> MenopauseSymptomType.WEIGHT_GAIN
+                                OnboardingSymptom.JOINT_PAIN -> MenopauseSymptomType.JOINT_PAIN
+                                OnboardingSymptom.ANXIETY -> MenopauseSymptomType.ANXIETY
+                                OnboardingSymptom.LOW_LIBIDO -> MenopauseSymptomType.LOW_LIBIDO
+                                OnboardingSymptom.NONE -> null
+                            }
+                        }
+
+                        MenopauseProfileRepository.saveProfile(
+                            userId = userId,
+                            stage = stage,
+                            lastPeriodDate = null,
+                            hrtStatus = HRTStatus.NONE,
+                            primarySymptoms = symptoms.ifEmpty { null }
+                        )
+                        Log.d(TAG, "✅ MenopauseProfile created from onboarding: stage=$stage, symptoms=$symptoms")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ Failed to create MenopauseProfile: ${e.message}")
+                    }
+                }
             } else {
                 Log.e(TAG, "❌ Failed to save onboarding data: ${result.exceptionOrNull()?.message}")
             }

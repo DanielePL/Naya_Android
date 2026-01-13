@@ -1,5 +1,8 @@
 package com.example.menotracker.screens.mindfulness
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,11 +14,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -25,20 +30,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.menotracker.billing.SubscriptionManager
 import com.example.menotracker.data.models.*
-import com.example.menotracker.ui.theme.AppBackground
+import com.example.menotracker.ui.theme.*
 
-// Colors
-private val lavenderPrimary = Color(0xFFA78BFA)
-private val lavenderLight = Color(0xFFC4B5FD)
-private val tealAccent = Color(0xFF14B8A6)
-private val pinkAccent = Color(0xFFEC4899)
-private val textWhite = Color(0xFFFFFFFF)
-private val textGray = Color(0xFF9CA3AF)
-private val cardBg = Color(0xFF1E1E1E)
+// ═══════════════════════════════════════════════════════════════
+// NAYA MINDFULNESS - Design System
+// ═══════════════════════════════════════════════════════════════
+
+// Mindfulness-specific accent (Teal - Ruhe & Balance)
+private val mindfulnessPrimary = NayaSecondary           // #14B8A6
+private val mindfulnessLight = Color(0xFF2DD4BF)         // Lighter teal
+private val mindfulnessDark = Color(0xFF0D9488)          // Darker teal
+
+// Category colors
+private val breathingColor = NayaPrimary                 // Violet
+private val meditationColor = mindfulnessPrimary         // Teal
+private val soundscapeColor = NayaAccent                 // Pink
+
+// Text & Surface (from NAYA theme)
+private val textPrimary = NayaTextWhite
+private val textSecondary = NayaTextSecondary
+private val textTertiary = NayaTextTertiary
+private val cardSurface = NayaSurface
+private val glassSurface = NayaGlass
 
 /**
- * Mindfulness Hub Screen
- * Combines Breathing, Meditation, and Soundscape into one entry point
+ * NAYA Mindfulness Hub
+ * Premium wellness experience with Breathing, Meditation & Soundscape
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,121 +70,98 @@ fun MindfulnessScreen(
     onNavigateToPaywall: () -> Unit
 ) {
     var showUpgradeDialog by remember { mutableStateOf(false) }
+    val hasPremium = SubscriptionManager.hasPremiumAccess()
 
     AppBackground {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopAppBar(
-                    title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Spa,
-                                contentDescription = null,
-                                tint = lavenderLight,
-                                modifier = Modifier.size(28.dp)
-                            )
-                            Column {
-                                Text(
-                                    text = "MINDFULNESS",
-                                    color = textWhite,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
-                                )
-                                Text(
-                                    text = "Breathe, meditate, relax",
-                                    color = lavenderLight,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = textWhite
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
-                )
+                MindfulnessTopBar(onNavigateBack = onNavigateBack)
             }
         ) { padding ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
+                    .padding(padding),
+                contentPadding = PaddingValues(bottom = 100.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Quick Start Section
+                // Hero Section with animated breathing visual
                 item {
-                    Text(
-                        text = "Quick Start",
-                        color = textWhite,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                    HeroSection(
+                        onQuickBreathing = { onNavigateToBreathingSession(BreathingExerciseType.RELAXATION_478) },
+                        onQuickMeditation = { onNavigateToMeditationSession(MeditationType.BODY_SCAN) }
                     )
                 }
 
-                // Featured free exercises
+                // Today's Focus - Quick Actions
                 item {
-                    QuickStartRow(
+                    SectionHeader(
+                        title = "Schnellstart",
+                        subtitle = "Starte direkt mit einer Session",
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+
+                item {
+                    QuickStartGrid(
                         onBreathingClick = { onNavigateToBreathingSession(BreathingExerciseType.RELAXATION_478) },
-                        onMeditationClick = { onNavigateToMeditationSession(MeditationType.BODY_SCAN) }
+                        onMeditationClick = { onNavigateToMeditationSession(MeditationType.BODY_SCAN) },
+                        onSoundscapeClick = {
+                            if (SubscriptionManager.canUseSoundscapeMixer()) {
+                                onNavigateToSoundscape()
+                            } else {
+                                showUpgradeDialog = true
+                            }
+                        },
+                        hasPremium = hasPremium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
-                // Main categories
+                // Main Categories
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Explore",
-                        color = textWhite,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                    SectionHeader(
+                        title = "Entdecken",
+                        subtitle = "Wähle deinen Fokus",
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
-                // Breathing card
+                // Breathing Category Card
                 item {
-                    CategoryCard(
-                        title = "Breathing",
-                        subtitle = "Calm your nervous system",
-                        icon = Icons.Default.Air,
-                        accentColor = lavenderLight,
-                        gradientColors = listOf(lavenderPrimary, lavenderLight),
-                        exerciseCount = "${BreathingExerciseType.entries.size} exercises",
-                        onClick = onNavigateToBreathing
+                    CategoryFeatureCard(
+                        title = "Atemübungen",
+                        subtitle = "Beruhige dein Nervensystem",
+                        description = "Wissenschaftlich fundierte Techniken für Entspannung und Stressabbau",
+                        icon = Icons.Outlined.Air,
+                        accentColor = breathingColor,
+                        exerciseCount = BreathingExerciseType.entries.size,
+                        freeCount = 1,
+                        onClick = onNavigateToBreathing,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
-                // Meditation card
+                // Meditation Category Card
                 item {
-                    CategoryCard(
+                    CategoryFeatureCard(
                         title = "Meditation",
-                        subtitle = "Find your inner peace",
-                        icon = Icons.Default.SelfImprovement,
-                        accentColor = tealAccent,
-                        gradientColors = listOf(tealAccent, Color(0xFF0D9488)),
-                        exerciseCount = "${MeditationType.entries.size} meditations",
-                        onClick = onNavigateToMeditation
+                        subtitle = "Finde innere Ruhe",
+                        description = "Geführte Meditationen für jeden Moment",
+                        icon = Icons.Outlined.SelfImprovement,
+                        accentColor = meditationColor,
+                        exerciseCount = MeditationType.entries.size,
+                        freeCount = 2,
+                        onClick = onNavigateToMeditation,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
-                // Soundscape card (Premium feature)
+                // Soundscape Mixer Card
                 item {
-                    SoundscapeCard(
+                    SoundscapeMixerCard(
                         isLocked = !SubscriptionManager.canUseSoundscapeMixer(),
                         onClick = {
                             if (SubscriptionManager.canUseSoundscapeMixer()) {
@@ -175,35 +169,34 @@ fun MindfulnessScreen(
                             } else {
                                 showUpgradeDialog = true
                             }
-                        }
+                        },
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
-                // Today's recommendation
+                // Free Sounds Preview
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Recommended for You",
-                        color = textWhite,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                    SectionHeader(
+                        title = "Ambient Sounds",
+                        subtitle = "Kostenlos verfügbar",
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
                 item {
-                    RecommendationCard(
-                        onBreathingClick = { onNavigateToBreathingSession(BreathingExerciseType.RELAXATION_478) },
-                        onMeditationClick = { onNavigateToMeditationSession(MeditationType.GRATITUDE) }
-                    )
+                    FreeSoundsRow(modifier = Modifier.padding(start = 16.dp))
                 }
 
-                // Free vs Premium comparison
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TierComparisonCard(
-                        hasFullAccess = SubscriptionManager.hasPremiumAccess(),
-                        onUpgradeClick = onNavigateToPaywall
-                    )
+                // Premium Upsell (if not premium)
+                if (!hasPremium) {
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        PremiumUpsellCard(
+                            onUpgradeClick = onNavigateToPaywall,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
                 }
 
                 // Bottom spacing
@@ -214,143 +207,388 @@ fun MindfulnessScreen(
         }
     }
 
-    // Upgrade dialog
+    // Upgrade Dialog
     if (showUpgradeDialog) {
-        AlertDialog(
-            onDismissRequest = { showUpgradeDialog = false },
-            title = {
-                Text("Premium Feature", color = textWhite, fontWeight = FontWeight.Bold)
+        NayaUpgradeDialog(
+            feature = "Soundscape Mixer",
+            description = "Mixe mehrere Sounds zusammen und entspanne mit deinem persönlichen Klangbild.",
+            onUpgrade = {
+                showUpgradeDialog = false
+                onNavigateToPaywall()
             },
-            text = {
-                Text(
-                    "The Soundscape Mixer is a Premium feature. Upgrade to mix multiple sounds and access the full library.",
-                    color = textGray
+            onDismiss = { showUpgradeDialog = false }
+        )
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TOP BAR
+// ═══════════════════════════════════════════════════════════════
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MindfulnessTopBar(onNavigateBack: () -> Unit) {
+    TopAppBar(
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Animated icon
+                val infiniteTransition = rememberInfiniteTransition(label = "icon")
+                val scale by infiniteTransition.animateFloat(
+                    initialValue = 1f,
+                    targetValue = 1.1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(2000, easing = EaseInOutSine),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "scale"
                 )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showUpgradeDialog = false
-                        onNavigateToPaywall()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = lavenderPrimary)
-                ) {
-                    Text("Upgrade")
+
+                Icon(
+                    imageVector = Icons.Default.Spa,
+                    contentDescription = null,
+                    tint = mindfulnessLight,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .scale(scale)
+                )
+
+                Column {
+                    Text(
+                        text = "MINDFULNESS",
+                        color = textPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = SpaceGrotesk,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "Atmen · Meditieren · Entspannen",
+                        color = mindfulnessLight,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = Poppins
+                    )
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showUpgradeDialog = false }) {
-                    Text("Maybe Later", color = textGray)
-                }
-            },
-            containerColor = cardBg
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Zurück",
+                    tint = textPrimary
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
         )
-    }
+    )
 }
 
-@Composable
-private fun QuickStartRow(
-    onBreathingClick: () -> Unit,
-    onMeditationClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Quick breathing
-        QuickStartCard(
-            emoji = "\uD83C\uDF43",
-            title = "4-7-8 Breathing",
-            subtitle = "4 min",
-            color = lavenderLight,
-            modifier = Modifier.weight(1f),
-            onClick = onBreathingClick
-        )
-
-        // Quick meditation
-        QuickStartCard(
-            emoji = "\uD83E\uDDD8",
-            title = "Body Scan",
-            subtitle = "10 min",
-            color = tealAccent,
-            modifier = Modifier.weight(1f),
-            onClick = onMeditationClick
-        )
-    }
-}
+// ═══════════════════════════════════════════════════════════════
+// HERO SECTION
+// ═══════════════════════════════════════════════════════════════
 
 @Composable
-private fun QuickStartCard(
-    emoji: String,
-    title: String,
-    subtitle: String,
-    color: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+private fun HeroSection(
+    onQuickBreathing: () -> Unit,
+    onQuickMeditation: () -> Unit
 ) {
-    Card(
-        modifier = modifier.clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+    // Animated breathing circle
+    val infiniteTransition = rememberInfiniteTransition(label = "breathing")
+    val breathScale by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "breathScale"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        mindfulnessPrimary.copy(alpha = 0.3f),
+                        mindfulnessDark.copy(alpha = 0.1f)
+                    )
+                )
+            )
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Breathing visualization
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(100.dp)
+                    .scale(breathScale)
                     .clip(CircleShape)
-                    .background(color.copy(alpha = 0.2f)),
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                mindfulnessLight.copy(alpha = 0.6f),
+                                mindfulnessPrimary.copy(alpha = 0.2f),
+                                Color.Transparent
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = emoji, fontSize = 24.sp)
+                Icon(
+                    imageVector = Icons.Outlined.Air,
+                    contentDescription = null,
+                    tint = textPrimary,
+                    modifier = Modifier.size(40.dp)
+                )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Nimm dir einen Moment",
+                color = textPrimary,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = SpaceGrotesk
+            )
 
-            Column {
-                Text(
-                    text = title,
-                    color = textWhite,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = subtitle,
-                    color = textGray,
-                    fontSize = 12.sp
-                )
+            Text(
+                text = "Atme tief ein und lass los",
+                color = textSecondary,
+                fontSize = 14.sp,
+                fontFamily = Poppins
+            )
+
+            // Quick action buttons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                FilledTonalButton(
+                    onClick = onQuickBreathing,
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = breathingColor.copy(alpha = 0.3f),
+                        contentColor = textPrimary
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Air,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("4-7-8 Atmen", fontFamily = Poppins, fontSize = 13.sp)
+                }
+
+                FilledTonalButton(
+                    onClick = onQuickMeditation,
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = meditationColor.copy(alpha = 0.3f),
+                        contentColor = textPrimary
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.SelfImprovement,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Body Scan", fontFamily = Poppins, fontSize = 13.sp)
+                }
             }
         }
     }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SECTION HEADER
+// ═══════════════════════════════════════════════════════════════
+
 @Composable
-private fun CategoryCard(
+private fun SectionHeader(
     title: String,
-    subtitle: String,
-    icon: ImageVector,
-    accentColor: Color,
-    gradientColors: List<Color>,
-    exerciseCount: String,
+    subtitle: String? = null,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            color = textPrimary,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = SpaceGrotesk
+        )
+        subtitle?.let {
+            Text(
+                text = it,
+                color = textSecondary,
+                fontSize = 13.sp,
+                fontFamily = Poppins
+            )
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUICK START GRID
+// ═══════════════════════════════════════════════════════════════
+
+@Composable
+private fun QuickStartGrid(
+    onBreathingClick: () -> Unit,
+    onMeditationClick: () -> Unit,
+    onSoundscapeClick: () -> Unit,
+    hasPremium: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        QuickStartTile(
+            emoji = "🍃",
+            title = "Atmen",
+            duration = "4 min",
+            color = breathingColor,
+            onClick = onBreathingClick,
+            modifier = Modifier.weight(1f)
+        )
+
+        QuickStartTile(
+            emoji = "🧘",
+            title = "Meditation",
+            duration = "10 min",
+            color = meditationColor,
+            onClick = onMeditationClick,
+            modifier = Modifier.weight(1f)
+        )
+
+        QuickStartTile(
+            emoji = "🎧",
+            title = "Sounds",
+            duration = "∞",
+            color = soundscapeColor,
+            isLocked = !hasPremium,
+            onClick = onSoundscapeClick,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun QuickStartTile(
+    emoji: String,
+    title: String,
+    duration: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+    isLocked: Boolean = false,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
+    Surface(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        color = glassSurface,
+        border = BorderStroke(1.dp, color.copy(alpha = 0.3f))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = emoji,
+                    fontSize = 32.sp,
+                    color = if (isLocked) textTertiary else Color.Unspecified
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = title,
+                    color = if (isLocked) textTertiary else textPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = Poppins
+                )
+                Text(
+                    text = duration,
+                    color = if (isLocked) textTertiary else color,
+                    fontSize = 12.sp,
+                    fontFamily = Poppins
+                )
+            }
+
+            // Lock badge
+            if (isLocked) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(6.dp),
+                    color = NayaPrimary.copy(alpha = 0.3f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Premium",
+                        tint = NayaPrimary,
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .size(12.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CATEGORY FEATURE CARD
+// ═══════════════════════════════════════════════════════════════
+
+@Composable
+private fun CategoryFeatureCard(
+    title: String,
+    subtitle: String,
+    description: String,
+    icon: ImageVector,
+    accentColor: Color,
+    exerciseCount: Int,
+    freeCount: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        color = Color.Transparent
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = gradientColors.map { it.copy(alpha = 0.7f) }
+                        colors = listOf(
+                            accentColor.copy(alpha = 0.25f),
+                            accentColor.copy(alpha = 0.1f)
+                        )
                     )
                 )
                 .padding(20.dp)
@@ -359,18 +597,18 @@ private fun CategoryCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
+                // Icon container
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = accentColor.copy(alpha = 0.3f)
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = textWhite,
-                        modifier = Modifier.size(32.dp)
+                        tint = textPrimary,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .size(32.dp)
                     )
                 }
 
@@ -379,27 +617,30 @@ private fun CategoryCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = title,
-                        color = textWhite,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        color = textPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = SpaceGrotesk
                     )
                     Text(
                         text = subtitle,
-                        color = textWhite.copy(alpha = 0.8f),
-                        fontSize = 14.sp
+                        color = accentColor,
+                        fontSize = 13.sp,
+                        fontFamily = Poppins
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = exerciseCount,
-                        color = textWhite.copy(alpha = 0.6f),
-                        fontSize = 12.sp
+                        text = "$exerciseCount Übungen · $freeCount kostenlos",
+                        color = textSecondary,
+                        fontSize = 12.sp,
+                        fontFamily = Poppins
                     )
                 }
 
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Open",
-                    tint = textWhite,
+                    contentDescription = "Öffnen",
+                    tint = accentColor,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -407,17 +648,26 @@ private fun CategoryCard(
     }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SOUNDSCAPE MIXER CARD
+// ═══════════════════════════════════════════════════════════════
+
 @Composable
-private fun SoundscapeCard(
+private fun SoundscapeMixerCard(
     isLocked: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = Modifier
+    Surface(
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+        shape = RoundedCornerShape(20.dp),
+        color = glassSurface,
+        border = BorderStroke(
+            1.dp,
+            if (isLocked) NayaBorder else soundscapeColor.copy(alpha = 0.3f)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -425,18 +675,18 @@ private fun SoundscapeCard(
                 .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(pinkAccent.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
+            // Animated mixer icon
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = soundscapeColor.copy(alpha = if (isLocked) 0.1f else 0.2f)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Tune,
+                    imageVector = Icons.Outlined.Tune,
                     contentDescription = null,
-                    tint = pinkAccent,
-                    modifier = Modifier.size(28.dp)
+                    tint = if (isLocked) textTertiary else soundscapeColor,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(28.dp)
                 )
             }
 
@@ -446,37 +696,28 @@ private fun SoundscapeCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "Soundscape Mixer",
-                        color = if (isLocked) textGray else textWhite,
+                        color = if (isLocked) textSecondary else textPrimary,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = SpaceGrotesk
                     )
                     if (isLocked) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = lavenderPrimary.copy(alpha = 0.3f)
-                        ) {
-                            Text(
-                                text = "PREMIUM",
-                                color = lavenderLight,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
+                        PremiumBadge()
                     }
                 }
                 Text(
-                    text = "Mix multiple sounds together",
-                    color = textGray,
-                    fontSize = 12.sp
+                    text = "Mixe bis zu 4 Sounds zusammen",
+                    color = textSecondary,
+                    fontSize = 12.sp,
+                    fontFamily = Poppins
                 )
             }
 
             Icon(
                 imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.ChevronRight,
                 contentDescription = null,
-                tint = if (isLocked) textGray else textWhite,
+                tint = if (isLocked) textTertiary else soundscapeColor,
                 modifier = Modifier.size(24.dp)
             )
         }
@@ -484,176 +725,232 @@ private fun SoundscapeCard(
 }
 
 @Composable
-private fun RecommendationCard(
-    onBreathingClick: () -> Unit,
-    onMeditationClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+private fun PremiumBadge() {
+    Surface(
+        shape = RoundedCornerShape(4.dp),
+        color = NayaPrimary.copy(alpha = 0.3f)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Start your mindfulness journey",
-                color = textGray,
-                fontSize = 12.sp
-            )
+        Text(
+            text = "PREMIUM",
+            color = NayaPrimary,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = Poppins,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
+}
 
-            Spacer(modifier = Modifier.height(12.dp))
+// ═══════════════════════════════════════════════════════════════
+// FREE SOUNDS ROW
+// ═══════════════════════════════════════════════════════════════
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Breathing recommendation
-                RecommendationItem(
-                    emoji = "\uD83C\uDF43",
-                    title = "Evening wind-down",
-                    description = "4-7-8 breathing helps calm the nervous system before sleep",
-                    buttonText = "Try Now",
-                    buttonColor = lavenderLight,
-                    modifier = Modifier.weight(1f),
-                    onClick = onBreathingClick
-                )
-            }
+@Composable
+private fun FreeSoundsRow(modifier: Modifier = Modifier) {
+    val freeSounds = AmbientSound.getFreeSounds()
+
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(end = 16.dp)
+    ) {
+        items(freeSounds) { sound ->
+            SoundChip(sound = sound)
         }
     }
 }
 
 @Composable
-private fun RecommendationItem(
-    emoji: String,
-    title: String,
-    description: String,
-    buttonText: String,
-    buttonColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Column(modifier = modifier) {
-        Text(text = emoji, fontSize = 32.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = title,
-            color = textWhite,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            text = description,
-            color = textGray,
-            fontSize = 12.sp,
-            lineHeight = 16.sp
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Button(
-            onClick = onClick,
-            colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+private fun SoundChip(sound: AmbientSound) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = glassSurface,
+        border = BorderStroke(1.dp, NayaBorder)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = buttonText, fontSize = 12.sp)
+            Text(text = sound.emoji, fontSize = 20.sp)
+            Text(
+                text = sound.displayName,
+                color = textPrimary,
+                fontSize = 13.sp,
+                fontFamily = Poppins
+            )
         }
     }
 }
 
-@Composable
-private fun TierComparisonCard(
-    hasFullAccess: Boolean,
-    onUpgradeClick: () -> Unit
-) {
-    if (hasFullAccess) return
+// ═══════════════════════════════════════════════════════════════
+// PREMIUM UPSELL CARD
+// ═══════════════════════════════════════════════════════════════
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+@Composable
+private fun PremiumUpsellCard(
+    onUpgradeClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = Color.Transparent
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    tint = lavenderLight,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Unlock Full Access",
-                    color = textWhite,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                // Free tier
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Free",
-                        color = textGray,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            NayaPrimary.copy(alpha = 0.2f),
+                            NayaAccent.copy(alpha = 0.1f)
+                        )
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TierFeature(text = "1 breathing exercise")
-                    TierFeature(text = "2 meditations")
-                    TierFeature(text = "3 ambient sounds")
+                )
+                .padding(20.dp)
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = NayaPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Vollzugang freischalten",
+                        color = textPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = SpaceGrotesk
+                    )
                 }
 
-                // Premium tier
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Premium",
-                        color = lavenderLight,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TierFeature(text = "5 breathing exercises", isPremium = true)
-                    TierFeature(text = "8 meditations", isPremium = true)
-                    TierFeature(text = "Soundscape mixer", isPremium = true)
-                    TierFeature(text = "All sounds & music", isPremium = true)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Benefits grid
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        BenefitItem(text = "5 Atemübungen")
+                        BenefitItem(text = "8 Meditationen")
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        BenefitItem(text = "Soundscape Mixer")
+                        BenefitItem(text = "Alle Sounds & Musik")
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = onUpgradeClick,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = lavenderPrimary),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Upgrade to Premium")
+                Button(
+                    onClick = onUpgradeClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = NayaPrimary
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Premium holen",
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun TierFeature(
-    text: String,
-    isPremium: Boolean = false
-) {
+private fun BenefitItem(text: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 2.dp)
+        modifier = Modifier.padding(vertical = 4.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Check,
             contentDescription = null,
-            tint = if (isPremium) lavenderLight else textGray,
-            modifier = Modifier.size(14.dp)
+            tint = mindfulnessLight,
+            modifier = Modifier.size(16.dp)
         )
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
-            color = if (isPremium) textWhite else textGray,
-            fontSize = 11.sp
+            color = textPrimary,
+            fontSize = 13.sp,
+            fontFamily = Poppins
         )
     }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UPGRADE DIALOG
+// ═══════════════════════════════════════════════════════════════
+
+@Composable
+private fun NayaUpgradeDialog(
+    feature: String,
+    description: String,
+    onUpgrade: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = null,
+                tint = NayaPrimary,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text(
+                text = "Premium Feature",
+                color = textPrimary,
+                fontWeight = FontWeight.Bold,
+                fontFamily = SpaceGrotesk
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = feature,
+                    color = NayaPrimary,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = Poppins
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = description,
+                    color = textSecondary,
+                    fontFamily = Poppins,
+                    fontSize = 14.sp
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onUpgrade,
+                colors = ButtonDefaults.buttonColors(containerColor = NayaPrimary)
+            ) {
+                Text("Upgrade", fontFamily = Poppins)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Später", color = textSecondary, fontFamily = Poppins)
+            }
+        },
+        containerColor = cardSurface,
+        shape = RoundedCornerShape(20.dp)
+    )
 }

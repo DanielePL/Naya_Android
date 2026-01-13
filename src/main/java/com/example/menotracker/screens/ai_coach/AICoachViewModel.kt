@@ -12,6 +12,7 @@ import com.example.menotracker.data.models.*
 import com.example.menotracker.viewmodels.WorkoutBuilderViewModel
 import io.github.jan.supabase.gotrue.auth
 import com.example.menotracker.viewmodels.WorkoutTemplate
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -87,6 +88,18 @@ class AICoachViewModel(
     private val _isLoadingConversations = MutableStateFlow(false)
     val isLoadingConversations: StateFlow<Boolean> = _isLoadingConversations.asStateFlow()
 
+    // Menopause Wellness Context
+    private val _wellnessContext = MutableStateFlow<MenopauseWellnessContext?>(null)
+    val wellnessContext: StateFlow<MenopauseWellnessContext?> = _wellnessContext.asStateFlow()
+
+    // Proactive Alerts
+    private val _activeAlerts = MutableStateFlow<List<ProactiveAlert>>(emptyList())
+    val activeAlerts: StateFlow<List<ProactiveAlert>> = _activeAlerts.asStateFlow()
+
+    // Top alert for banner display
+    private val _topAlert = MutableStateFlow<ProactiveAlert?>(null)
+    val topAlert: StateFlow<ProactiveAlert?> = _topAlert.asStateFlow()
+
     // Temporary storage for message ID to link actions to messages
     private var _lastAiMessageId: String? = null
 
@@ -98,6 +111,7 @@ class AICoachViewModel(
         loadUserWorkoutTemplates()
         loadPublicWorkoutTemplates()
         loadConversations()
+        loadWellnessContext()
         // Don't send welcome message yet - wait for conversations to load
     }
 
@@ -117,6 +131,97 @@ class AICoachViewModel(
                 .onFailure { error ->
                     Log.e(TAG, "❌ Failed to load user profile: ${error.message}")
                 }
+        }
+    }
+
+    /**
+     * Load comprehensive wellness context for AI-powered insights
+     */
+    private fun loadWellnessContext() {
+        viewModelScope.launch {
+            val userId = getCurrentUserId()
+            if (userId == null) {
+                Log.w(TAG, "⚠️ No user logged in - skipping wellness context load")
+                return@launch
+            }
+
+            try {
+                Log.d(TAG, "🔄 Loading wellness context for AI Coach...")
+
+                // Build comprehensive context from all health data
+                val context = LocalUserContextBuilder.buildContext(userId, _userProfile.value)
+                _wellnessContext.value = context
+
+                Log.d(TAG, "✅ Wellness context loaded: ${if (context.hasData) "has data" else "no data yet"}")
+
+                // Check for proactive alerts
+                checkProactiveAlerts(userId, context)
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Failed to load wellness context: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Check for proactive alerts and update state
+     */
+    private suspend fun checkProactiveAlerts(userId: String, context: MenopauseWellnessContext) {
+        try {
+            val alerts = ProactiveAlertEngine.checkAlerts(userId, context)
+            _activeAlerts.value = alerts
+
+            // Get top alert for banner
+            val topAlert = ProactiveAlertEngine.getTopAlert(userId, context)
+            _topAlert.value = topAlert
+
+            if (alerts.isNotEmpty()) {
+                Log.d(TAG, "🔔 Found ${alerts.size} proactive alerts, top: ${topAlert?.title}")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error checking proactive alerts: ${e.message}")
+        }
+    }
+
+    /**
+     * Refresh wellness context and alerts
+     */
+    fun refreshWellnessContext() {
+        loadWellnessContext()
+    }
+
+    /**
+     * Dismiss an alert (user clicked dismiss)
+     */
+    fun dismissAlert(alertId: String) {
+        _activeAlerts.value = _activeAlerts.value.filter { it.id != alertId }
+        if (_topAlert.value?.id == alertId) {
+            _topAlert.value = _activeAlerts.value.firstOrNull { it.shouldShowBanner() }
+        }
+    }
+
+    /**
+     * Start a proactive conversation based on an alert
+     */
+    fun startProactiveChat(alert: ProactiveAlert) {
+        viewModelScope.launch {
+            // Create new conversation if needed
+            if (_currentConversationId.value != null) {
+                createNewChat()
+            }
+
+            // Add the alert as an AI message to start the conversation
+            val proactiveMessage = ChatMessage(
+                id = UUID.randomUUID().toString(),
+                content = alert.toConversationStarter(),
+                role = "assistant"
+            )
+            _messages.value = listOf(proactiveMessage)
+
+            // Dismiss the alert
+            dismissAlert(alert.id)
+
+            Log.d(TAG, "💬 Started proactive chat: ${alert.title}")
         }
     }
 
@@ -227,17 +332,65 @@ class AICoachViewModel(
         try {
             Log.d(TAG, "🔄 Using NAYA Backend AI Coach Chat...")
 
-            // Build chat context with menopause wellness data
+            // Build comprehensive chat context with all wellness data
             val profile = _userProfile.value
+            val wellness = _wellnessContext.value
+            val alerts = _activeAlerts.value
+
+            // Convert symptoms to RecentSymptom format
+            val recentSymptomsList = wellness?.recentSymptoms?.take(20)?.map { symptom ->
+                RecentSymptom(
+                    type = symptom.symptomType,
+                    severity = symptom.intensity,
+                    date = symptom.loggedAt.substring(0, 10),
+                    notes = symptom.notes
+                )
+            }
+
+            // Build formatted context summary for system prompt
+            val contextSummary = wellness?.let { LocalUserContextBuilder.formatContextForPrompt(it) }
+
             val chatContext = ChatContext(
                 currentScreen = "ai_coach",
                 selectedExerciseId = null,
                 selectedWorkoutId = null,
-                // Menopause-specific context from user profile
+
+                // User profile
+                userName = profile?.name?.split(" ")?.firstOrNull(),
+                userAge = profile?.age,
+
+                // Menopause-specific context
                 menopauseStage = profile?.menopauseStage,
                 primarySymptoms = profile?.primarySymptoms,
                 wellnessGoals = profile?.wellnessGoals,
-                userAge = profile?.age
+
+                // Recent symptoms
+                recentSymptoms = recentSymptomsList,
+
+                // Sleep data
+                avgSleepHours = wellness?.sleepStats?.averageHours,
+                avgSleepQuality = wellness?.sleepStats?.averageQuality,
+                sleepInterruptions = wellness?.sleepStats?.totalInterruptions,
+
+                // Mood data
+                dominantMood = wellness?.moodStats?.dominantMood?.displayName,
+                moodTriggers = wellness?.moodStats?.mostCommonTriggers?.take(3)?.map { it.first.displayName },
+
+                // Bone health
+                avgCalciumMg = wellness?.boneHealthLogs?.map { it.calciumMg }?.average()?.toFloat(),
+                avgVitaminDIu = wellness?.boneHealthLogs?.map { it.vitaminDIu }?.average()?.toFloat(),
+                strengthTrainingDays = wellness?.boneHealthLogs?.count { it.strengthTrainingDone },
+
+                // Dietary preferences
+                dietaryPreferences = profile?.dietaryPreferences,
+                foodAllergies = profile?.foodAllergies,
+
+                // Active concerns from alerts
+                activeConcerns = alerts.filter { it.priority == AlertPriority.HIGH || it.priority == AlertPriority.MEDIUM }
+                    .map { "${it.title}: ${it.message}" },
+
+                // Full context summary
+                wellnessContextSummary = contextSummary
             )
 
             // Convert MessageAttachment to ChatAttachment with Base64 encoding
@@ -676,5 +829,108 @@ class AICoachViewModel(
 
     fun clearChat() {
         createNewChat()
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // QUICK ACTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Quick action types for menopause wellness support
+     */
+    enum class QuickAction(
+        val displayName: String,
+        val emoji: String,
+        val prompt: String
+    ) {
+        SYMPTOMS(
+            "Discuss Symptoms",
+            "🔥",
+            "I'd like to talk about my current symptoms and get some relief strategies."
+        ),
+        SLEEP(
+            "Sleep Help",
+            "😴",
+            "I'm having trouble sleeping. Can you help me with some strategies?"
+        ),
+        NUTRITION(
+            "Nutrition Tips",
+            "🥗",
+            "What foods and supplements would help with my menopause symptoms?"
+        ),
+        RELAXATION(
+            "Relaxation",
+            "🧘‍♀️",
+            "I'm feeling stressed. Can you guide me through a relaxation technique?"
+        ),
+        EXERCISE(
+            "Exercise Ideas",
+            "🏃‍♀️",
+            "What exercises would be good for me during menopause?"
+        ),
+        MOOD(
+            "Mood Support",
+            "💜",
+            "I've been feeling emotionally overwhelmed lately. Can we talk about it?"
+        )
+    }
+
+    /**
+     * Send a quick action message
+     */
+    fun sendQuickAction(action: QuickAction, context: Context? = null) {
+        sendMessage(action.prompt, emptyList(), context)
+    }
+
+    /**
+     * Get recommended quick actions based on current wellness context
+     */
+    fun getRecommendedQuickActions(): List<QuickAction> {
+        val wellness = _wellnessContext.value ?: return listOf(
+            QuickAction.SYMPTOMS,
+            QuickAction.SLEEP,
+            QuickAction.NUTRITION
+        )
+
+        val recommendations = mutableListOf<QuickAction>()
+
+        // Prioritize based on current health data
+        val sleepStats = wellness.sleepStats
+        if (sleepStats != null && sleepStats.averageHours < 6f) {
+            recommendations.add(QuickAction.SLEEP)
+        }
+
+        val moodStats = wellness.moodStats
+        if (moodStats?.dominantMood in listOf(MoodType.SAD, MoodType.ANXIOUS, MoodType.ANGRY)) {
+            recommendations.add(QuickAction.MOOD)
+        }
+
+        // Check for frequent symptoms
+        if (wellness.symptomStats.isNotEmpty()) {
+            recommendations.add(QuickAction.SYMPTOMS)
+        }
+
+        // Always include nutrition for menopause wellness
+        recommendations.add(QuickAction.NUTRITION)
+
+        // Add relaxation if stress indicators
+        if (moodStats?.mostCommonTriggers?.any { it.first == MoodTrigger.STRESS } == true) {
+            recommendations.add(QuickAction.RELAXATION)
+        }
+
+        // Exercise if inactive
+        if (wellness.boneHealthLogs.none { it.strengthTrainingDone }) {
+            recommendations.add(QuickAction.EXERCISE)
+        }
+
+        return recommendations.distinct().take(4)
+    }
+
+    /**
+     * Get a quick summary of the user's wellness status
+     */
+    fun getWellnessSummary(): String {
+        val wellness = _wellnessContext.value ?: return "Start tracking your wellness to get personalized insights!"
+        return LocalUserContextBuilder.generateQuickSummary(wellness)
     }
 }

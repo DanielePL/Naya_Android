@@ -1184,7 +1184,7 @@ private fun StartWorkoutDialog(
     onStart: (scalingLevel: String, isMale: Boolean) -> Unit
 ) {
     var selectedScaling by remember { mutableStateOf("rx") }
-    var selectedGender by remember { mutableStateOf(true) } // true = male
+    // Always use female weights for menopause app (isMale = false)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -1301,53 +1301,6 @@ private fun StartWorkoutDialog(
                     }
                 }
 
-                // Gender selection (for weights)
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "Weights For",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf(true to "Male", false to "Female").forEach { (isMale, label) ->
-                            val isSelected = selectedGender == isMale
-
-                            Surface(
-                                onClick = { selectedGender = isMale },
-                                color = if (isSelected) NayaPrimary.copy(alpha = 0.2f) else Color.Transparent,
-                                shape = RoundedCornerShape(8.dp),
-                                border = androidx.compose.foundation.BorderStroke(
-                                    width = if (isSelected) 2.dp else 1.dp,
-                                    color = if (isSelected) NayaPrimary else Color.Gray.copy(alpha = 0.3f)
-                                ),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        if (isMale) Icons.Default.Male else Icons.Default.Female,
-                                        null,
-                                        tint = if (isSelected) NayaPrimary else Color.Gray,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(
-                                        label,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) NayaPrimary else Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // Info text
                 Surface(
                     color = Color(0xFF2196F3).copy(alpha = 0.1f),
@@ -1374,7 +1327,7 @@ private fun StartWorkoutDialog(
         },
         confirmButton = {
             Button(
-                onClick = { onStart(selectedScaling, selectedGender) },
+                onClick = { onStart(selectedScaling, false) },  // Always female weights
                 colors = ButtonDefaults.buttonColors(containerColor = NayaPrimary)
             ) {
                 Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))

@@ -151,11 +151,10 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
         weight: Double?,
         height: Double?,
         age: Int? = null,
-        gender: com.example.menotracker.data.models.Gender? = null,
         activityLevel: com.example.menotracker.data.models.ActivityLevel? = null,
         years: Int?
     ) {
-        Log.d(TAG, "🔵 updateBodyStats called: name=$name, weight=$weight, height=$height, age=$age, gender=$gender, activityLevel=$activityLevel, years=$years")
+        Log.d(TAG, "🔵 updateBodyStats called: name=$name, weight=$weight, height=$height, age=$age, activityLevel=$activityLevel, years=$years")
         viewModelScope.launch {
             val currentProfile = _userProfile.value
             if (currentProfile == null) {
@@ -170,7 +169,7 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
                 weight = weight,
                 height = height,
                 age = age ?: currentProfile.age,
-                gender = gender ?: currentProfile.gender,
+                gender = com.example.menotracker.data.models.Gender.FEMALE,  // Always female for menopause app
                 activityLevel = activityLevel ?: currentProfile.activityLevel,
                 trainingExperience = years
             )
@@ -632,11 +631,7 @@ class AccountViewModel(application: Application) : AndroidViewModel(application)
                 val strengthProfile = UserStrengthProfile(
                     id = "local_${userId}",
                     userId = userId,
-                    gender = when (profile.gender) {
-                        com.example.menotracker.data.models.Gender.MALE -> StrengthGender.MALE
-                        com.example.menotracker.data.models.Gender.FEMALE -> StrengthGender.FEMALE
-                        else -> StrengthGender.MALE
-                    },
+                    gender = StrengthGender.FEMALE,  // Always female for menopause app
                     bodyweightKg = profile.weight?.toFloat() ?: 80f,
                     experienceLevel = when (profile.trainingExperience) {
                         in 0..1 -> StrengthExperienceLevel.BEGINNER

@@ -1,5 +1,6 @@
 package com.example.menotracker.screens.breathing
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,18 +26,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.menotracker.data.models.*
-import com.example.menotracker.ui.theme.AppBackground
+import com.example.menotracker.ui.theme.*
 import com.example.menotracker.viewmodels.BreathingUiState
 import com.example.menotracker.viewmodels.BreathingViewModel
 
-// Colors
-private val lavenderPrimary = Color(0xFFA78BFA)
-private val lavenderLight = Color(0xFFC4B5FD)
-private val tealAccent = Color(0xFF14B8A6)
-private val pinkAccent = Color(0xFFEC4899)
-private val textWhite = Color(0xFFFFFFFF)
-private val textGray = Color(0xFF9CA3AF)
-private val cardBg = Color(0xFF1E1E1E)
+// ═══════════════════════════════════════════════════════════════
+// NAYA BREATHING - Design System
+// ═══════════════════════════════════════════════════════════════
+
+// Breathing-specific accent (Violet - Ruhe & Entspannung)
+private val breathingPrimary = NayaPrimary                 // #A78BFA
+private val breathingLight = Color(0xFFC4B5FD)             // Lighter violet
+private val breathingDark = Color(0xFF8B5CF6)              // Darker violet
+
+// Text & Surface (from NAYA theme)
+private val textPrimary = NayaTextWhite
+private val textSecondary = NayaTextSecondary
+private val textTertiary = NayaTextTertiary
+private val cardSurface = NayaSurface
+private val glassSurface = NayaGlass
 
 /**
  * Main Breathing Exercises Screen
@@ -62,11 +71,19 @@ fun BreathingScreen(
     if (showUpgradePrompt) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissUpgradePrompt() },
-            title = { Text("Premium Exercise", color = textWhite) },
+            title = {
+                Text(
+                    "Premium Atemübung",
+                    color = textPrimary,
+                    fontFamily = SpaceGrotesk,
+                    fontWeight = FontWeight.Bold
+                )
+            },
             text = {
                 Text(
-                    "This breathing exercise requires a Premium subscription. Upgrade to unlock all 5 exercises.",
-                    color = textGray
+                    "Diese Atemübung erfordert ein Premium-Abo. Upgrade um alle 5 Übungen freizuschalten.",
+                    color = textSecondary,
+                    fontFamily = Poppins
                 )
             },
             confirmButton = {
@@ -75,17 +92,17 @@ fun BreathingScreen(
                         viewModel.dismissUpgradePrompt()
                         onNavigateToPaywall()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = lavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = breathingPrimary)
                 ) {
-                    Text("Upgrade")
+                    Text("Upgraden", fontFamily = Poppins, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissUpgradePrompt() }) {
-                    Text("Maybe Later", color = textGray)
+                    Text("Vielleicht später", color = textSecondary, fontFamily = Poppins)
                 }
             },
-            containerColor = cardBg
+            containerColor = cardSurface
         )
     }
 
@@ -99,25 +116,36 @@ fun BreathingScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Air,
-                                contentDescription = null,
-                                tint = lavenderLight,
-                                modifier = Modifier.size(28.dp)
-                            )
+                            // Icon container
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(breathingPrimary.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Air,
+                                    contentDescription = null,
+                                    tint = breathingPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                             Column {
                                 Text(
-                                    text = "BREATHING",
-                                    color = textWhite,
+                                    text = "ATEMÜBUNGEN",
+                                    color = textPrimary,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
+                                    fontFamily = SpaceGrotesk,
+                                    letterSpacing = 1.5.sp
                                 )
                                 Text(
-                                    text = "Calm your mind",
-                                    color = lavenderLight,
+                                    text = "Beruhige deinen Geist",
+                                    color = breathingPrimary,
                                     fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    fontFamily = Poppins
                                 )
                             }
                         }
@@ -126,8 +154,8 @@ fun BreathingScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = textWhite
+                                contentDescription = "Zurück",
+                                tint = textPrimary
                             )
                         }
                     },
@@ -155,10 +183,11 @@ fun BreathingScreen(
                 // Section: Available Exercises
                 item {
                     Text(
-                        text = "Exercises",
-                        color = textWhite,
+                        text = "Übungen",
+                        color = textPrimary,
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = SpaceGrotesk
                     )
                 }
 
@@ -191,10 +220,11 @@ fun BreathingScreen(
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Recent Sessions",
-                            color = textWhite,
+                            text = "Letzte Sessions",
+                            color = textPrimary,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = SpaceGrotesk
                         )
                     }
 
@@ -214,20 +244,33 @@ fun BreathingScreen(
 
 @Composable
 private fun BreathingStatsCard(stats: BreathingStats) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+        shape = RoundedCornerShape(20.dp),
+        color = glassSurface,
+        border = BorderStroke(1.dp, breathingPrimary.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "Your Progress",
-                color = lavenderLight,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Timeline,
+                    contentDescription = null,
+                    tint = breathingPrimary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Dein Fortschritt",
+                    color = breathingPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = SpaceGrotesk
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -239,38 +282,48 @@ private fun BreathingStatsCard(stats: BreathingStats) {
                 )
                 StatItem(
                     value = "${stats.totalMinutes}",
-                    label = "Minutes"
+                    label = "Minuten"
                 )
                 StatItem(
                     value = "${stats.currentStreak}",
-                    label = "Day Streak"
+                    label = "Tage Streak"
                 )
             }
 
             stats.favoriteExercise?.let { favorite ->
                 Spacer(modifier = Modifier.height(16.dp))
-                Divider(color = Color(0xFF2D2D2D))
+                HorizontalDivider(color = textTertiary.copy(alpha = 0.2f))
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = favorite.emoji,
-                        fontSize = 24.sp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(breathingPrimary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = favorite.emoji,
+                            fontSize = 20.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Favorite",
-                            color = textGray,
-                            fontSize = 12.sp
+                            text = "Favorit",
+                            color = textSecondary,
+                            fontSize = 12.sp,
+                            fontFamily = Poppins
                         )
                         Text(
                             text = favorite.displayName,
-                            color = textWhite,
+                            color = textPrimary,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = Poppins
                         )
                     }
                 }
@@ -284,14 +337,16 @@ private fun StatItem(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            color = textWhite,
+            color = textPrimary,
             fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontFamily = SpaceGrotesk
         )
         Text(
             text = label,
-            color = textGray,
-            fontSize = 12.sp
+            color = textSecondary,
+            fontSize = 12.sp,
+            fontFamily = Poppins
         )
     }
 }
@@ -301,12 +356,12 @@ private fun FeaturedExerciseCard(
     exercise: BreathingExerciseType,
     onClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        color = Color.Transparent
     ) {
         Box(
             modifier = Modifier
@@ -314,8 +369,8 @@ private fun FeaturedExerciseCard(
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            lavenderPrimary.copy(alpha = 0.8f),
-                            tealAccent.copy(alpha = 0.6f)
+                            breathingPrimary.copy(alpha = 0.7f),
+                            NayaSecondary.copy(alpha = 0.5f)
                         )
                     )
                 )
@@ -337,20 +392,22 @@ private fun FeaturedExerciseCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = exercise.displayName,
-                            color = textWhite,
+                            color = textPrimary,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = SpaceGrotesk
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Surface(
                             shape = RoundedCornerShape(4.dp),
-                            color = Color.White.copy(alpha = 0.2f)
+                            color = Color.White.copy(alpha = 0.25f)
                         ) {
                             Text(
-                                text = "FREE",
-                                color = textWhite,
+                                text = "GRATIS",
+                                color = textPrimary,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
+                                fontFamily = SpaceGrotesk,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -360,8 +417,9 @@ private fun FeaturedExerciseCard(
 
                     Text(
                         text = exercise.description,
-                        color = textWhite.copy(alpha = 0.8f),
+                        color = textPrimary.copy(alpha = 0.85f),
                         fontSize = 13.sp,
+                        fontFamily = Poppins,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -377,17 +435,25 @@ private fun FeaturedExerciseCard(
                         )
                         ExerciseInfoChip(
                             icon = Icons.Default.Repeat,
-                            text = "${exercise.defaultCycles} cycles"
+                            text = "${exercise.defaultCycles} Zyklen"
                         )
                     }
                 }
 
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Start",
-                    tint = textWhite,
-                    modifier = Modifier.size(32.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Starten",
+                        tint = textPrimary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
         }
     }
@@ -399,13 +465,16 @@ private fun ExerciseCard(
     isLocked: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isLocked) cardBg.copy(alpha = 0.6f) else cardBg
+        color = if (isLocked) glassSurface.copy(alpha = 0.5f) else glassSurface,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isLocked) textTertiary.copy(alpha = 0.1f)
+            else breathingPrimary.copy(alpha = 0.2f)
         )
     ) {
         Row(
@@ -414,7 +483,7 @@ private fun ExerciseCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Emoji icon
+            // Emoji icon with difficulty-based background
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -436,18 +505,19 @@ private fun ExerciseCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = exercise.displayName,
-                        color = if (isLocked) textGray else textWhite,
+                        color = if (isLocked) textSecondary else textPrimary,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = SpaceGrotesk
                     )
 
                     if (isLocked) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "Locked",
-                            tint = textGray,
-                            modifier = Modifier.size(16.dp)
+                            contentDescription = "Gesperrt",
+                            tint = textSecondary,
+                            modifier = Modifier.size(14.dp)
                         )
                     }
                 }
@@ -456,40 +526,60 @@ private fun ExerciseCard(
 
                 Text(
                     text = exercise.targetSymptoms.take(2).joinToString(" | "),
-                    color = textGray,
-                    fontSize = 12.sp
+                    color = textSecondary,
+                    fontSize = 12.sp,
+                    fontFamily = Poppins
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Duration
-                    Text(
-                        text = "${exercise.totalDurationSeconds / 60} min",
-                        color = textGray,
-                        fontSize = 11.sp
-                    )
-
-                    Text(text = "|", color = textGray.copy(alpha = 0.5f), fontSize = 11.sp)
+                    // Duration chip
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = textTertiary.copy(alpha = 0.1f)
+                    ) {
+                        Text(
+                            text = "${exercise.totalDurationSeconds / 60} min",
+                            color = textSecondary,
+                            fontSize = 11.sp,
+                            fontFamily = Poppins,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
 
                     // Difficulty
                     Text(
                         text = exercise.difficulty.displayName,
                         color = Color(exercise.difficulty.color),
-                        fontSize = 11.sp
+                        fontSize = 11.sp,
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
 
-            // Play/Lock icon
-            Icon(
-                imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.PlayArrow,
-                contentDescription = if (isLocked) "Locked" else "Start",
-                tint = if (isLocked) textGray else lavenderLight,
-                modifier = Modifier.size(24.dp)
-            )
+            // Play/Lock icon with background
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isLocked) textTertiary.copy(alpha = 0.1f)
+                        else breathingPrimary.copy(alpha = 0.15f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.PlayArrow,
+                    contentDescription = if (isLocked) "Gesperrt" else "Starten",
+                    tint = if (isLocked) textSecondary else breathingPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -505,14 +595,15 @@ private fun ExerciseInfoChip(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = textWhite.copy(alpha = 0.7f),
+            tint = textPrimary.copy(alpha = 0.75f),
             modifier = Modifier.size(14.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = text,
-            color = textWhite.copy(alpha = 0.7f),
-            fontSize = 12.sp
+            color = textPrimary.copy(alpha = 0.75f),
+            fontSize = 12.sp,
+            fontFamily = Poppins
         )
     }
 }
@@ -521,10 +612,11 @@ private fun ExerciseInfoChip(
 private fun RecentSessionCard(session: BreathingSession) {
     val exercise = session.exerciseEnum ?: return
 
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+        color = glassSurface,
+        border = BorderStroke(1.dp, textTertiary.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier
@@ -532,24 +624,34 @@ private fun RecentSessionCard(session: BreathingSession) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = exercise.emoji,
-                fontSize = 28.sp
-            )
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(breathingPrimary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = exercise.emoji,
+                    fontSize = 22.sp
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = exercise.displayName,
-                    color = textWhite,
+                    color = textPrimary,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = SpaceGrotesk
                 )
                 Text(
-                    text = "${session.durationSeconds / 60} min | ${session.cyclesCompleted} cycles",
-                    color = textGray,
-                    fontSize = 12.sp
+                    text = "${session.durationSeconds / 60} min | ${session.cyclesCompleted} Zyklen",
+                    color = textSecondary,
+                    fontSize = 12.sp,
+                    fontFamily = Poppins
                 )
             }
 
@@ -558,15 +660,27 @@ private fun RecentSessionCard(session: BreathingSession) {
                 if (improvement > 0) {
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFF10B981).copy(alpha = 0.15f)
+                        color = breathingPrimary.copy(alpha = 0.15f)
                     ) {
-                        Text(
-                            text = "+$improvement",
-                            color = Color(0xFF10B981),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
+                                contentDescription = null,
+                                tint = breathingPrimary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "+$improvement",
+                                color = breathingPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = SpaceGrotesk
+                            )
+                        }
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package com.example.menotracker.screens.meditation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,18 +26,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.menotracker.data.models.*
-import com.example.menotracker.ui.theme.AppBackground
+import com.example.menotracker.ui.theme.*
 import com.example.menotracker.viewmodels.MeditationUiState
 import com.example.menotracker.viewmodels.MeditationViewModel
 
-// Colors
-private val lavenderPrimary = Color(0xFFA78BFA)
-private val lavenderLight = Color(0xFFC4B5FD)
-private val tealAccent = Color(0xFF14B8A6)
-private val pinkAccent = Color(0xFFEC4899)
-private val textWhite = Color(0xFFFFFFFF)
-private val textGray = Color(0xFF9CA3AF)
-private val cardBg = Color(0xFF1E1E1E)
+// ═══════════════════════════════════════════════════════════════
+// NAYA MEDITATION - Design System
+// ═══════════════════════════════════════════════════════════════
+
+// Meditation-specific accent (Teal - Ruhe & Balance)
+private val meditationPrimary = NayaSecondary              // #14B8A6
+private val meditationLight = Color(0xFF2DD4BF)            // Lighter teal
+private val meditationDark = Color(0xFF0D9488)             // Darker teal
+
+// Text & Surface (from NAYA theme)
+private val textPrimary = NayaTextWhite
+private val textSecondary = NayaTextSecondary
+private val textTertiary = NayaTextTertiary
+private val cardSurface = NayaSurface
+private val glassSurface = NayaGlass
 
 /**
  * Main Meditation Screen
@@ -63,11 +72,19 @@ fun MeditationScreen(
     if (showUpgradePrompt) {
         AlertDialog(
             onDismissRequest = { viewModel.dismissUpgradePrompt() },
-            title = { Text("Premium Meditation", color = textWhite) },
+            title = {
+                Text(
+                    "Premium Meditation",
+                    color = textPrimary,
+                    fontFamily = SpaceGrotesk,
+                    fontWeight = FontWeight.Bold
+                )
+            },
             text = {
                 Text(
-                    "This meditation requires a Premium subscription. Upgrade to unlock all meditations and the Soundscape mixer.",
-                    color = textGray
+                    "Diese Meditation erfordert ein Premium-Abo. Upgrade um alle Meditationen und den Soundscape-Mixer freizuschalten.",
+                    color = textSecondary,
+                    fontFamily = Poppins
                 )
             },
             confirmButton = {
@@ -76,17 +93,17 @@ fun MeditationScreen(
                         viewModel.dismissUpgradePrompt()
                         onNavigateToPaywall()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = lavenderPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = NayaPrimary)
                 ) {
-                    Text("Upgrade")
+                    Text("Upgraden", fontFamily = Poppins, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissUpgradePrompt() }) {
-                    Text("Maybe Later", color = textGray)
+                    Text("Vielleicht später", color = textSecondary, fontFamily = Poppins)
                 }
             },
-            containerColor = cardBg
+            containerColor = cardSurface
         )
     }
 
@@ -100,25 +117,36 @@ fun MeditationScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.SelfImprovement,
-                                contentDescription = null,
-                                tint = tealAccent,
-                                modifier = Modifier.size(28.dp)
-                            )
+                            // Animated icon container
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(meditationPrimary.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SelfImprovement,
+                                    contentDescription = null,
+                                    tint = meditationPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                             Column {
                                 Text(
                                     text = "MEDITATION",
-                                    color = textWhite,
+                                    color = textPrimary,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
+                                    fontFamily = SpaceGrotesk,
+                                    letterSpacing = 1.5.sp
                                 )
                                 Text(
-                                    text = "Find your peace",
-                                    color = tealAccent,
+                                    text = "Finde deine innere Ruhe",
+                                    color = meditationPrimary,
                                     fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    fontFamily = Poppins
                                 )
                             }
                         }
@@ -127,8 +155,8 @@ fun MeditationScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = textWhite
+                                contentDescription = "Zurück",
+                                tint = textPrimary
                             )
                         }
                     },
@@ -170,10 +198,11 @@ fun MeditationScreen(
                 // Categories
                 item {
                     Text(
-                        text = "Guided Meditations",
-                        color = textWhite,
+                        text = "Geführte Meditationen",
+                        color = textPrimary,
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = SpaceGrotesk
                     )
                 }
 
@@ -186,12 +215,22 @@ fun MeditationScreen(
                 val freeMeditations = MeditationType.getFreeMeditations()
                 if (freeMeditations.isNotEmpty()) {
                     item {
-                        Text(
-                            text = "Free",
-                            color = tealAccent,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(meditationPrimary)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Kostenlos",
+                                color = meditationPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = SpaceGrotesk
+                            )
+                        }
                     }
 
                     freeMeditations.forEach { meditation ->
@@ -214,18 +253,26 @@ fun MeditationScreen(
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(NayaPrimary)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Premium",
-                                color = lavenderLight,
+                                color = NayaPrimary,
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = SpaceGrotesk
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
-                                tint = lavenderLight,
-                                modifier = Modifier.size(16.dp)
+                                tint = NayaPrimary,
+                                modifier = Modifier.size(14.dp)
                             )
                         }
                     }
@@ -253,10 +300,11 @@ fun MeditationScreen(
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Recent Sessions",
-                            color = textWhite,
+                            text = "Letzte Sessions",
+                            color = textPrimary,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = SpaceGrotesk
                         )
                     }
 
@@ -276,49 +324,72 @@ fun MeditationScreen(
 
 @Composable
 private fun MeditationStatsCard(stats: MeditationStats) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+        shape = RoundedCornerShape(20.dp),
+        color = glassSurface,
+        border = BorderStroke(1.dp, meditationPrimary.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "Your Journey",
-                color = tealAccent,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Timeline,
+                    contentDescription = null,
+                    tint = meditationPrimary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Deine Reise",
+                    color = meditationPrimary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = SpaceGrotesk
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 StatItem(value = "${stats.totalSessions}", label = "Sessions")
-                StatItem(value = "${stats.totalMinutes}", label = "Minutes")
-                StatItem(value = "${stats.currentStreak}", label = "Day Streak")
+                StatItem(value = "${stats.totalMinutes}", label = "Minuten")
+                StatItem(value = "${stats.currentStreak}", label = "Tage Streak")
             }
 
             stats.favoriteType?.let { favorite ->
                 Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(color = Color(0xFF2D2D2D))
+                HorizontalDivider(color = textTertiary.copy(alpha = 0.2f))
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = favorite.emoji, fontSize = 24.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(meditationPrimary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = favorite.emoji, fontSize = 20.sp)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Favorite",
-                            color = textGray,
-                            fontSize = 12.sp
+                            text = "Favorit",
+                            color = textSecondary,
+                            fontSize = 12.sp,
+                            fontFamily = Poppins
                         )
                         Text(
                             text = favorite.displayName,
-                            color = textWhite,
+                            color = textPrimary,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = Poppins
                         )
                     }
                 }
@@ -332,14 +403,16 @@ private fun StatItem(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            color = textWhite,
+            color = textPrimary,
             fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontFamily = SpaceGrotesk
         )
         Text(
             text = label,
-            color = textGray,
-            fontSize = 12.sp
+            color = textSecondary,
+            fontSize = 12.sp,
+            fontFamily = Poppins
         )
     }
 }
@@ -349,12 +422,12 @@ private fun SoundscapeCard(
     isLocked: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        shape = RoundedCornerShape(20.dp),
+        color = Color.Transparent
     ) {
         Box(
             modifier = Modifier
@@ -362,8 +435,8 @@ private fun SoundscapeCard(
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            tealAccent.copy(alpha = 0.7f),
-                            lavenderPrimary.copy(alpha = 0.5f)
+                            meditationPrimary.copy(alpha = 0.6f),
+                            NayaPrimary.copy(alpha = 0.4f)
                         )
                     )
                 )
@@ -383,7 +456,7 @@ private fun SoundscapeCard(
                     Icon(
                         imageVector = Icons.Default.Tune,
                         contentDescription = null,
-                        tint = textWhite,
+                        tint = textPrimary,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -394,31 +467,52 @@ private fun SoundscapeCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Soundscape Mixer",
-                            color = textWhite,
+                            color = textPrimary,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = SpaceGrotesk
                         )
                         if (isLocked) {
                             Spacer(modifier = Modifier.width(8.dp))
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Premium",
-                                tint = textWhite.copy(alpha = 0.7f),
-                                modifier = Modifier.size(16.dp)
-                            )
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = NayaPrimary.copy(alpha = 0.3f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Lock,
+                                        contentDescription = "Premium",
+                                        tint = textPrimary,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Text(
+                                        text = "PRO",
+                                        color = textPrimary,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = SpaceGrotesk
+                                    )
+                                }
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Mix multiple sounds to create your perfect ambiance",
-                        color = textWhite.copy(alpha = 0.8f),
-                        fontSize = 13.sp
+                        text = "Mixe mehrere Sounds für deine perfekte Atmosphäre",
+                        color = textPrimary.copy(alpha = 0.8f),
+                        fontSize = 13.sp,
+                        fontFamily = Poppins
                     )
                 }
 
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Open",
-                    tint = textWhite,
+                    contentDescription = "Öffnen",
+                    tint = textPrimary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -438,10 +532,17 @@ private fun CategoryChips() {
             FilterChip(
                 selected = selectedCategory == null,
                 onClick = { selectedCategory = null },
-                label = { Text("All", fontSize = 12.sp) },
+                label = {
+                    Text(
+                        "Alle",
+                        fontSize = 12.sp,
+                        fontFamily = Poppins
+                    )
+                },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = lavenderPrimary.copy(alpha = 0.3f),
-                    selectedLabelColor = textWhite
+                    selectedContainerColor = meditationPrimary.copy(alpha = 0.3f),
+                    selectedLabelColor = textPrimary,
+                    labelColor = textSecondary
                 )
             )
         }
@@ -453,12 +554,17 @@ private fun CategoryChips() {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(category.emoji, fontSize = 14.sp)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(category.displayName, fontSize = 12.sp)
+                        Text(
+                            category.displayName,
+                            fontSize = 12.sp,
+                            fontFamily = Poppins
+                        )
                     }
                 },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = lavenderPrimary.copy(alpha = 0.3f),
-                    selectedLabelColor = textWhite
+                    selectedContainerColor = meditationPrimary.copy(alpha = 0.3f),
+                    selectedLabelColor = textPrimary,
+                    labelColor = textSecondary
                 )
             )
         }
@@ -472,13 +578,17 @@ private fun MeditationCard(
     isFeatured: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isLocked) cardBg.copy(alpha = 0.6f) else cardBg
+        color = if (isLocked) glassSurface.copy(alpha = 0.5f) else glassSurface,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isFeatured) meditationPrimary.copy(alpha = 0.3f)
+            else if (isLocked) textTertiary.copy(alpha = 0.1f)
+            else NayaPrimary.copy(alpha = 0.2f)
         )
     ) {
         Row(
@@ -487,14 +597,14 @@ private fun MeditationCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Emoji icon
+            // Emoji icon with accent background
             Box(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isFeatured) tealAccent.copy(alpha = 0.15f)
-                        else lavenderPrimary.copy(alpha = 0.15f)
+                        if (isFeatured) meditationPrimary.copy(alpha = 0.15f)
+                        else NayaPrimary.copy(alpha = 0.15f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -510,18 +620,19 @@ private fun MeditationCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = meditation.displayName,
-                        color = if (isLocked) textGray else textWhite,
+                        color = if (isLocked) textSecondary else textPrimary,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = SpaceGrotesk
                     )
 
                     if (isLocked) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "Locked",
-                            tint = textGray,
-                            modifier = Modifier.size(16.dp)
+                            contentDescription = "Gesperrt",
+                            tint = textSecondary,
+                            modifier = Modifier.size(14.dp)
                         )
                     }
                 }
@@ -530,50 +641,74 @@ private fun MeditationCard(
 
                 Text(
                     text = meditation.description,
-                    color = textGray,
+                    color = textSecondary,
                     fontSize = 12.sp,
+                    fontFamily = Poppins,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Duration
-                    Text(
-                        text = "${meditation.defaultDurationMinutes} min",
-                        color = textGray,
-                        fontSize = 11.sp
-                    )
-
-                    Text(text = "|", color = textGray.copy(alpha = 0.5f), fontSize = 11.sp)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Duration chip
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = textTertiary.copy(alpha = 0.1f)
+                    ) {
+                        Text(
+                            text = "${meditation.defaultDurationMinutes} min",
+                            color = textSecondary,
+                            fontSize = 11.sp,
+                            fontFamily = Poppins,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
 
                     // Category
                     Text(
                         text = meditation.category.displayName,
-                        color = if (isFeatured) tealAccent else lavenderLight,
-                        fontSize = 11.sp
+                        color = if (isFeatured) meditationPrimary else NayaPrimary,
+                        fontSize = 11.sp,
+                        fontFamily = Poppins,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
 
-            // Play/Lock icon
-            Icon(
-                imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.PlayArrow,
-                contentDescription = if (isLocked) "Locked" else "Start",
-                tint = if (isLocked) textGray else if (isFeatured) tealAccent else lavenderLight,
-                modifier = Modifier.size(24.dp)
-            )
+            // Play/Lock icon with background
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isLocked) textTertiary.copy(alpha = 0.1f)
+                        else if (isFeatured) meditationPrimary.copy(alpha = 0.15f)
+                        else NayaPrimary.copy(alpha = 0.15f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.PlayArrow,
+                    contentDescription = if (isLocked) "Gesperrt" else "Starten",
+                    tint = if (isLocked) textSecondary else if (isFeatured) meditationPrimary else NayaPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun RecentMeditationCard(session: MeditationSession) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = cardBg)
+        color = glassSurface,
+        border = BorderStroke(1.dp, textTertiary.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier
@@ -581,24 +716,34 @@ private fun RecentMeditationCard(session: MeditationSession) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = session.meditationType.emoji,
-                fontSize = 28.sp
-            )
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(meditationPrimary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = session.meditationType.emoji,
+                    fontSize = 22.sp
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = session.meditationType.displayName,
-                    color = textWhite,
+                    color = textPrimary,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = SpaceGrotesk
                 )
                 Text(
                     text = "${session.durationSeconds / 60} min",
-                    color = textGray,
-                    fontSize = 12.sp
+                    color = textSecondary,
+                    fontSize = 12.sp,
+                    fontFamily = Poppins
                 )
             }
 
@@ -610,15 +755,27 @@ private fun RecentMeditationCard(session: MeditationSession) {
                 if (improvement > 0) {
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFF10B981).copy(alpha = 0.15f)
+                        color = meditationPrimary.copy(alpha = 0.15f)
                     ) {
-                        Text(
-                            text = "+$improvement",
-                            color = Color(0xFF10B981),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
+                                contentDescription = null,
+                                tint = meditationPrimary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "+$improvement",
+                                color = meditationPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = SpaceGrotesk
+                            )
+                        }
                     }
                 }
             }
