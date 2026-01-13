@@ -73,7 +73,7 @@ fun BreathingScreen(
             onDismissRequest = { viewModel.dismissUpgradePrompt() },
             title = {
                 Text(
-                    "Premium Atemübung",
+                    "Premium Breathing Exercise",
                     color = textPrimary,
                     fontFamily = SpaceGrotesk,
                     fontWeight = FontWeight.Bold
@@ -81,7 +81,7 @@ fun BreathingScreen(
             },
             text = {
                 Text(
-                    "Diese Atemübung erfordert ein Premium-Abo. Upgrade um alle 5 Übungen freizuschalten.",
+                    "This breathing exercise requires a premium subscription. Upgrade to unlock all 5 exercises.",
                     color = textSecondary,
                     fontFamily = Poppins
                 )
@@ -94,12 +94,12 @@ fun BreathingScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = breathingPrimary)
                 ) {
-                    Text("Upgraden", fontFamily = Poppins, fontWeight = FontWeight.SemiBold)
+                    Text("Upgrade", fontFamily = Poppins, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissUpgradePrompt() }) {
-                    Text("Vielleicht später", color = textSecondary, fontFamily = Poppins)
+                    Text("Maybe later", color = textSecondary, fontFamily = Poppins)
                 }
             },
             containerColor = cardSurface
@@ -133,7 +133,7 @@ fun BreathingScreen(
                             }
                             Column {
                                 Text(
-                                    text = "ATEMÜBUNGEN",
+                                    text = "BREATHING",
                                     color = textPrimary,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
@@ -141,7 +141,7 @@ fun BreathingScreen(
                                     letterSpacing = 1.5.sp
                                 )
                                 Text(
-                                    text = "Beruhige deinen Geist",
+                                    text = "Calm your mind",
                                     color = breathingPrimary,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium,
@@ -154,7 +154,7 @@ fun BreathingScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Zurück",
+                                contentDescription = "Back",
                                 tint = textPrimary
                             )
                         }
@@ -183,7 +183,7 @@ fun BreathingScreen(
                 // Section: Available Exercises
                 item {
                     Text(
-                        text = "Übungen",
+                        text = "Exercises",
                         color = textPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -220,7 +220,7 @@ fun BreathingScreen(
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Letzte Sessions",
+                            text = "Recent Sessions",
                             color = textPrimary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -262,7 +262,7 @@ private fun BreathingStatsCard(stats: BreathingStats) {
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Dein Fortschritt",
+                    text = "Your Progress",
                     color = breathingPrimary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -282,11 +282,11 @@ private fun BreathingStatsCard(stats: BreathingStats) {
                 )
                 StatItem(
                     value = "${stats.totalMinutes}",
-                    label = "Minuten"
+                    label = "Minutes"
                 )
                 StatItem(
                     value = "${stats.currentStreak}",
-                    label = "Tage Streak"
+                    label = "Day Streak"
                 )
             }
 
@@ -313,7 +313,7 @@ private fun BreathingStatsCard(stats: BreathingStats) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Favorit",
+                            text = "Favorite",
                             color = textSecondary,
                             fontSize = 12.sp,
                             fontFamily = Poppins
@@ -403,7 +403,7 @@ private fun FeaturedExerciseCard(
                             color = Color.White.copy(alpha = 0.25f)
                         ) {
                             Text(
-                                text = "GRATIS",
+                                text = "FREE",
                                 color = textPrimary,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
@@ -435,7 +435,7 @@ private fun FeaturedExerciseCard(
                         )
                         ExerciseInfoChip(
                             icon = Icons.Default.Repeat,
-                            text = "${exercise.defaultCycles} Zyklen"
+                            text = "${exercise.defaultCycles} cycles"
                         )
                     }
                 }
@@ -449,7 +449,7 @@ private fun FeaturedExerciseCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Starten",
+                        contentDescription = "Start",
                         tint = textPrimary,
                         modifier = Modifier.size(28.dp)
                     )
@@ -515,7 +515,7 @@ private fun ExerciseCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "Gesperrt",
+                            contentDescription = "Locked",
                             tint = textSecondary,
                             modifier = Modifier.size(14.dp)
                         )
@@ -575,7 +575,7 @@ private fun ExerciseCard(
             ) {
                 Icon(
                     imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.PlayArrow,
-                    contentDescription = if (isLocked) "Gesperrt" else "Starten",
+                    contentDescription = if (isLocked) "Locked" else "Start",
                     tint = if (isLocked) textSecondary else breathingPrimary,
                     modifier = Modifier.size(20.dp)
                 )
@@ -648,7 +648,7 @@ private fun RecentSessionCard(session: BreathingSession) {
                     fontFamily = SpaceGrotesk
                 )
                 Text(
-                    text = "${session.durationSeconds / 60} min | ${session.cyclesCompleted} Zyklen",
+                    text = "${session.durationSeconds / 60} min | ${session.cyclesCompleted} cycles",
                     color = textSecondary,
                     fontSize = 12.sp,
                     fontFamily = Poppins

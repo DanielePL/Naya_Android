@@ -29,7 +29,10 @@ data class WorkoutTemplateDto(
     val sports: List<String>? = null,
 
     @SerialName("intensity")
-    val intensity: String? = "AKTIV"
+    val intensity: String? = "AKTIV",
+
+    @SerialName("video_url")
+    val videoUrl: String? = null
 )
 
 /**

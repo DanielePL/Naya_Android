@@ -47,6 +47,8 @@ data class WorkoutTemplate(
     val sports: List<String>? = null,
     // Intensity level for simplified workout selection (Sanft/Aktiv/Power)
     val intensity: String = "AKTIV",
+    // Video URL for workout preview (uploaded by admin)
+    val videoUrl: String? = null,
     // WOD-specific fields
     val wodTimerConfig: WodTimerConfig? = null,
     val isWod: Boolean = false,

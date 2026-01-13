@@ -63,7 +63,8 @@ fun BreathingAnimationCircle(
             val centerX = size.width / 2
             val centerY = size.height / 2
             val maxRadius = size.minDimension / 2
-            val currentRadius = maxRadius * animatedProgress
+            // Ensure radius is never 0 to prevent radialGradient crash
+            val currentRadius = (maxRadius * animatedProgress).coerceAtLeast(1f)
 
             // Glow effect
             drawCircle(

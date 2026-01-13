@@ -37,6 +37,7 @@ class VideoStorageManager(
     companion object {
         private const val TAG = "VideoStorageManager"
         private const val BUCKET_NAME = "workout-videos"
+        private const val ADMIN_BUCKET_NAME = "workout-templates"  // Public bucket for admin-uploaded workout videos
         private const val DEVICE_STORAGE_DIR = "Naya/videos"
         private const val GUEST_USER_ID = "00000000-0000-0000-0000-000000000000"
     }
@@ -396,5 +397,103 @@ class VideoStorageManager(
      */
     private fun isGuestUser(userId: String): Boolean {
         return userId == GUEST_USER_ID || userId.isBlank()
+    }
+
+    // ==================== ADMIN VIDEO UPLOAD ====================
+
+    /**
+     * Admin result for workout template video upload
+     */
+    data class AdminUploadResult(
+        val success: Boolean,
+        val videoUrl: String? = null,
+        val error: String? = null
+    )
+
+    /**
+     * Upload a workout template video (Admin only)
+     *
+     * Videos are stored in a public bucket for all users to access.
+     * Path: templates/{workoutTemplateId}/preview.mp4
+     *
+     * @param videoUri URI of the video file
+     * @param workoutTemplateId The workout template UUID
+     * @return AdminUploadResult with public URL or error
+     */
+    suspend fun uploadWorkoutTemplateVideo(
+        videoUri: Uri,
+        workoutTemplateId: String
+    ): AdminUploadResult = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "🎬 [ADMIN] Uploading workout template video...")
+            Log.d(TAG, "📁 Video URI: $videoUri")
+            Log.d(TAG, "🏋️ Template ID: $workoutTemplateId")
+
+            // Read video file
+            val inputStream = openInputStream(videoUri)
+                ?: return@withContext AdminUploadResult(
+                    success = false,
+                    error = "Cannot open video file"
+                )
+
+            val videoBytes = inputStream.readBytes()
+            inputStream.close()
+
+            val fileSizeMB = videoBytes.size / 1024.0 / 1024.0
+            Log.d(TAG, "📦 Video size: %.2f MB (%d bytes)".format(fileSizeMB, videoBytes.size))
+
+            // Check file size (limit to 100MB)
+            if (fileSizeMB > 100) {
+                return@withContext AdminUploadResult(
+                    success = false,
+                    error = "Video too large (max 100MB). Size: %.1f MB".format(fileSizeMB)
+                )
+            }
+
+            // Upload path: templates/{workoutTemplateId}/preview.mp4
+            val uploadPath = "templates/$workoutTemplateId/preview.mp4"
+            Log.d(TAG, "📤 Uploading to bucket '$ADMIN_BUCKET_NAME' path: $uploadPath")
+
+            // Upload to Supabase
+            val bucket = supabase.storage.from(ADMIN_BUCKET_NAME)
+            bucket.upload(uploadPath, videoBytes, upsert = true)
+            Log.d(TAG, "✅ Upload completed!")
+
+            // Get public URL (public bucket - no signed URL needed)
+            val publicUrl = bucket.publicUrl(uploadPath)
+            Log.d(TAG, "🔗 Public URL: $publicUrl")
+
+            AdminUploadResult(
+                success = true,
+                videoUrl = publicUrl
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ [ADMIN] Upload failed: ${e.message}", e)
+            AdminUploadResult(
+                success = false,
+                error = "Upload failed: ${e.message}"
+            )
+        }
+    }
+
+    /**
+     * Delete a workout template video (Admin only)
+     *
+     * @param workoutTemplateId The workout template UUID
+     * @return true if deleted successfully
+     */
+    suspend fun deleteWorkoutTemplateVideo(
+        workoutTemplateId: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val uploadPath = "templates/$workoutTemplateId/preview.mp4"
+            val bucket = supabase.storage.from(ADMIN_BUCKET_NAME)
+            bucket.delete(uploadPath)
+            Log.d(TAG, "✅ [ADMIN] Video deleted: $uploadPath")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ [ADMIN] Delete failed: ${e.message}", e)
+            false
+        }
     }
 }

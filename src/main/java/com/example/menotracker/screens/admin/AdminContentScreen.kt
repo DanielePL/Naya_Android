@@ -28,7 +28,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.menotracker.data.AdminManager
+import com.example.menotracker.data.SupabaseClient
 import com.example.menotracker.data.WorkoutTemplateRepository
+import com.example.menotracker.data.storage.VideoStorageManager
 import com.example.menotracker.ui.theme.NayaPrimary
 import com.example.menotracker.ui.theme.NayaSurface
 import com.example.menotracker.viewmodels.WorkoutTemplate
@@ -54,6 +56,11 @@ fun AdminContentScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // Video storage manager for uploads
+    val videoStorageManager = remember {
+        VideoStorageManager(context, SupabaseClient.client)
+    }
+
     // Admin check
     val isAdmin by AdminManager.isAdmin.collectAsState()
     val adminEmail by AdminManager.adminEmail.collectAsState()
@@ -62,10 +69,12 @@ fun AdminContentScreen(
     var publicTemplates by remember { mutableStateOf<List<WorkoutTemplate>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successMessage by remember { mutableStateOf<String?>(null) }
 
     // Video upload state
     var selectedVideoUri by remember { mutableStateOf<Uri?>(null) }
     var uploadingVideo by remember { mutableStateOf(false) }
+    var uploadProgress by remember { mutableStateOf("") }
     var showVideoUploadDialog by remember { mutableStateOf(false) }
     var selectedWorkoutForVideo by remember { mutableStateOf<WorkoutTemplate?>(null) }
 
@@ -378,13 +387,63 @@ fun AdminContentScreen(
                 videoPickerLauncher.launch("video/*")
             },
             selectedVideoUri = selectedVideoUri,
+            uploadProgress = uploadProgress,
             onUpload = {
+                val videoUri = selectedVideoUri ?: return@VideoUploadDialog
+                val workout = selectedWorkoutForVideo ?: return@VideoUploadDialog
+
                 scope.launch {
                     uploadingVideo = true
-                    // TODO: Implement actual video upload to Supabase Storage
-                    Log.d(TAG, "Uploading video ${selectedVideoUri} for workout ${selectedWorkoutForVideo?.name}")
-                    kotlinx.coroutines.delay(2000) // Simulate upload
+                    uploadProgress = "Uploading video..."
+                    errorMessage = null
+                    successMessage = null
+
+                    Log.d(TAG, "🎬 Starting upload for workout: ${workout.name} (${workout.id})")
+
+                    // Step 1: Upload video to Supabase Storage
+                    uploadProgress = "Uploading to cloud..."
+                    val uploadResult = videoStorageManager.uploadWorkoutTemplateVideo(
+                        videoUri = videoUri,
+                        workoutTemplateId = workout.id
+                    )
+
+                    if (!uploadResult.success) {
+                        Log.e(TAG, "❌ Upload failed: ${uploadResult.error}")
+                        errorMessage = "Upload failed: ${uploadResult.error}"
+                        uploadingVideo = false
+                        uploadProgress = ""
+                        return@launch
+                    }
+
+                    Log.d(TAG, "✅ Video uploaded: ${uploadResult.videoUrl}")
+
+                    // Step 2: Update workout template with video URL
+                    uploadProgress = "Updating database..."
+                    val updateResult = WorkoutTemplateRepository.updateWorkoutTemplateVideoUrl(
+                        templateId = workout.id,
+                        videoUrl = uploadResult.videoUrl
+                    )
+
+                    if (updateResult.isFailure) {
+                        Log.e(TAG, "❌ DB update failed: ${updateResult.exceptionOrNull()?.message}")
+                        errorMessage = "Database update failed: ${updateResult.exceptionOrNull()?.message}"
+                        uploadingVideo = false
+                        uploadProgress = ""
+                        return@launch
+                    }
+
+                    Log.d(TAG, "✅ Database updated successfully")
+
+                    // Step 3: Reload templates to show updated video status
+                    uploadProgress = "Refreshing..."
+                    WorkoutTemplateRepository.loadPublicWorkoutTemplates(forceRefresh = true)
+                        .onSuccess { templates ->
+                            publicTemplates = templates
+                            successMessage = "Video uploaded for ${workout.name}"
+                        }
+
                     uploadingVideo = false
+                    uploadProgress = ""
                     showVideoUploadDialog = false
                     selectedVideoUri = null
                     selectedWorkoutForVideo = null
@@ -392,11 +451,21 @@ fun AdminContentScreen(
             },
             uploading = uploadingVideo,
             onDismiss = {
-                showVideoUploadDialog = false
-                selectedVideoUri = null
-                selectedWorkoutForVideo = null
+                if (!uploadingVideo) {
+                    showVideoUploadDialog = false
+                    selectedVideoUri = null
+                    selectedWorkoutForVideo = null
+                }
             }
         )
+    }
+
+    // Success Snackbar
+    successMessage?.let { message ->
+        LaunchedEffect(message) {
+            kotlinx.coroutines.delay(3000)
+            successMessage = null
+        }
     }
 }
 
@@ -480,8 +549,8 @@ private fun AdminWorkoutCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
-                // Show video status (placeholder - videos not yet supported)
-                val hasVideo = false // TODO: Add videoUrl field to WorkoutTemplate
+                // Show video status
+                val hasVideo = template.videoUrl?.isNotBlank() == true
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -543,6 +612,7 @@ private fun VideoUploadDialog(
     onWorkoutSelected: (WorkoutTemplate) -> Unit,
     onSelectVideo: () -> Unit,
     selectedVideoUri: Uri?,
+    uploadProgress: String = "",
     onUpload: () -> Unit,
     uploading: Boolean,
     onDismiss: () -> Unit
@@ -635,7 +705,7 @@ private fun VideoUploadDialog(
                         strokeWidth = 2.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Uploading...")
+                    Text(uploadProgress.ifBlank { "Uploading..." })
                 } else {
                     Text("Upload")
                 }

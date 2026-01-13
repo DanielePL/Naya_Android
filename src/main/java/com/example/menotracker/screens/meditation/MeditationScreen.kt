@@ -82,7 +82,7 @@ fun MeditationScreen(
             },
             text = {
                 Text(
-                    "Diese Meditation erfordert ein Premium-Abo. Upgrade um alle Meditationen und den Soundscape-Mixer freizuschalten.",
+                    "This meditation requires a premium subscription. Upgrade to unlock all meditations and the soundscape mixer.",
                     color = textSecondary,
                     fontFamily = Poppins
                 )
@@ -95,12 +95,12 @@ fun MeditationScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = NayaPrimary)
                 ) {
-                    Text("Upgraden", fontFamily = Poppins, fontWeight = FontWeight.SemiBold)
+                    Text("Upgrade", fontFamily = Poppins, fontWeight = FontWeight.SemiBold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.dismissUpgradePrompt() }) {
-                    Text("Vielleicht später", color = textSecondary, fontFamily = Poppins)
+                    Text("Maybe later", color = textSecondary, fontFamily = Poppins)
                 }
             },
             containerColor = cardSurface
@@ -142,7 +142,7 @@ fun MeditationScreen(
                                     letterSpacing = 1.5.sp
                                 )
                                 Text(
-                                    text = "Finde deine innere Ruhe",
+                                    text = "Find your inner peace",
                                     color = meditationPrimary,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium,
@@ -155,7 +155,7 @@ fun MeditationScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Zurück",
+                                contentDescription = "Back",
                                 tint = textPrimary
                             )
                         }
@@ -198,7 +198,7 @@ fun MeditationScreen(
                 // Categories
                 item {
                     Text(
-                        text = "Geführte Meditationen",
+                        text = "Guided Meditations",
                         color = textPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -224,7 +224,7 @@ fun MeditationScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Kostenlos",
+                                text = "Free",
                                 color = meditationPrimary,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
@@ -300,7 +300,7 @@ fun MeditationScreen(
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Letzte Sessions",
+                            text = "Recent Sessions",
                             color = textPrimary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -342,7 +342,7 @@ private fun MeditationStatsCard(stats: MeditationStats) {
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = "Deine Reise",
+                    text = "Your Journey",
                     color = meditationPrimary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -357,8 +357,8 @@ private fun MeditationStatsCard(stats: MeditationStats) {
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 StatItem(value = "${stats.totalSessions}", label = "Sessions")
-                StatItem(value = "${stats.totalMinutes}", label = "Minuten")
-                StatItem(value = "${stats.currentStreak}", label = "Tage Streak")
+                StatItem(value = "${stats.totalMinutes}", label = "Minutes")
+                StatItem(value = "${stats.currentStreak}", label = "Day Streak")
             }
 
             stats.favoriteType?.let { favorite ->
@@ -379,7 +379,7 @@ private fun MeditationStatsCard(stats: MeditationStats) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Favorit",
+                            text = "Favorite",
                             color = textSecondary,
                             fontSize = 12.sp,
                             fontFamily = Poppins
@@ -502,7 +502,7 @@ private fun SoundscapeCard(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Mixe mehrere Sounds für deine perfekte Atmosphäre",
+                        text = "Mix multiple sounds for your perfect atmosphere",
                         color = textPrimary.copy(alpha = 0.8f),
                         fontSize = 13.sp,
                         fontFamily = Poppins
@@ -511,7 +511,7 @@ private fun SoundscapeCard(
 
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Öffnen",
+                    contentDescription = "Open",
                     tint = textPrimary,
                     modifier = Modifier.size(24.dp)
                 )
@@ -534,7 +534,7 @@ private fun CategoryChips() {
                 onClick = { selectedCategory = null },
                 label = {
                     Text(
-                        "Alle",
+                        "All",
                         fontSize = 12.sp,
                         fontFamily = Poppins
                     )
@@ -630,7 +630,7 @@ private fun MeditationCard(
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "Gesperrt",
+                            contentDescription = "Locked",
                             tint = textSecondary,
                             modifier = Modifier.size(14.dp)
                         )
@@ -693,7 +693,7 @@ private fun MeditationCard(
             ) {
                 Icon(
                     imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.PlayArrow,
-                    contentDescription = if (isLocked) "Gesperrt" else "Starten",
+                    contentDescription = if (isLocked) "Locked" else "Start",
                     tint = if (isLocked) textSecondary else if (isFeatured) meditationPrimary else NayaPrimary,
                     modifier = Modifier.size(20.dp)
                 )

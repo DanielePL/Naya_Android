@@ -97,8 +97,8 @@ fun MindfulnessScreen(
                 // Today's Focus - Quick Actions
                 item {
                     SectionHeader(
-                        title = "Schnellstart",
-                        subtitle = "Starte direkt mit einer Session",
+                        title = "Quick Start",
+                        subtitle = "Start a session directly",
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
@@ -123,8 +123,8 @@ fun MindfulnessScreen(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     SectionHeader(
-                        title = "Entdecken",
-                        subtitle = "Wähle deinen Fokus",
+                        title = "Explore",
+                        subtitle = "Choose your focus",
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
@@ -132,9 +132,9 @@ fun MindfulnessScreen(
                 // Breathing Category Card
                 item {
                     CategoryFeatureCard(
-                        title = "Atemübungen",
-                        subtitle = "Beruhige dein Nervensystem",
-                        description = "Wissenschaftlich fundierte Techniken für Entspannung und Stressabbau",
+                        title = "Breathing",
+                        subtitle = "Calm your nervous system",
+                        description = "Science-based techniques for relaxation and stress relief",
                         icon = Icons.Outlined.Air,
                         accentColor = breathingColor,
                         exerciseCount = BreathingExerciseType.entries.size,
@@ -148,8 +148,8 @@ fun MindfulnessScreen(
                 item {
                     CategoryFeatureCard(
                         title = "Meditation",
-                        subtitle = "Finde innere Ruhe",
-                        description = "Geführte Meditationen für jeden Moment",
+                        subtitle = "Find inner peace",
+                        description = "Guided meditations for every moment",
                         icon = Icons.Outlined.SelfImprovement,
                         accentColor = meditationColor,
                         exerciseCount = MeditationType.entries.size,
@@ -179,7 +179,7 @@ fun MindfulnessScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     SectionHeader(
                         title = "Ambient Sounds",
-                        subtitle = "Kostenlos verfügbar",
+                        subtitle = "Free",
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
@@ -211,7 +211,7 @@ fun MindfulnessScreen(
     if (showUpgradeDialog) {
         NayaUpgradeDialog(
             feature = "Soundscape Mixer",
-            description = "Mixe mehrere Sounds zusammen und entspanne mit deinem persönlichen Klangbild.",
+            description = "Mix multiple sounds together and relax with your personal soundscape.",
             onUpgrade = {
                 showUpgradeDialog = false
                 onNavigateToPaywall()
@@ -265,7 +265,7 @@ private fun MindfulnessTopBar(onNavigateBack: () -> Unit) {
                         letterSpacing = 2.sp
                     )
                     Text(
-                        text = "Atmen · Meditieren · Entspannen",
+                        text = "Breathe · Meditate · Relax",
                         color = mindfulnessLight,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
@@ -278,7 +278,7 @@ private fun MindfulnessTopBar(onNavigateBack: () -> Unit) {
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Zurück",
+                    contentDescription = "Back",
                     tint = textPrimary
                 )
             }
@@ -356,7 +356,7 @@ private fun HeroSection(
             }
 
             Text(
-                text = "Nimm dir einen Moment",
+                text = "Take a moment",
                 color = textPrimary,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
@@ -364,7 +364,7 @@ private fun HeroSection(
             )
 
             Text(
-                text = "Atme tief ein und lass los",
+                text = "Breathe in deeply and let go",
                 color = textSecondary,
                 fontSize = 14.sp,
                 fontFamily = Poppins
@@ -388,7 +388,7 @@ private fun HeroSection(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("4-7-8 Atmen", fontFamily = Poppins, fontSize = 13.sp)
+                    Text("4-7-8 Breathing", fontFamily = Poppins, fontSize = 13.sp)
                 }
 
                 FilledTonalButton(
@@ -459,7 +459,7 @@ private fun QuickStartGrid(
     ) {
         QuickStartTile(
             emoji = "🍃",
-            title = "Atmen",
+            title = "Breathe",
             duration = "4 min",
             color = breathingColor,
             onClick = onBreathingClick,
@@ -630,7 +630,7 @@ private fun CategoryFeatureCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "$exerciseCount Übungen · $freeCount kostenlos",
+                        text = "$exerciseCount exercises · $freeCount free",
                         color = textSecondary,
                         fontSize = 12.sp,
                         fontFamily = Poppins
@@ -639,7 +639,7 @@ private fun CategoryFeatureCard(
 
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Öffnen",
+                    contentDescription = "Open",
                     tint = accentColor,
                     modifier = Modifier.size(28.dp)
                 )
@@ -707,7 +707,7 @@ private fun SoundscapeMixerCard(
                     }
                 }
                 Text(
-                    text = "Mixe bis zu 4 Sounds zusammen",
+                    text = "Mix up to 4 sounds together",
                     color = textSecondary,
                     fontSize = 12.sp,
                     fontFamily = Poppins
@@ -820,7 +820,7 @@ private fun PremiumUpsellCard(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Vollzugang freischalten",
+                        text = "Unlock full access",
                         color = textPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -833,12 +833,12 @@ private fun PremiumUpsellCard(
                 // Benefits grid
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f)) {
-                        BenefitItem(text = "5 Atemübungen")
-                        BenefitItem(text = "8 Meditationen")
+                        BenefitItem(text = "5 breathing exercises")
+                        BenefitItem(text = "8 meditations")
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         BenefitItem(text = "Soundscape Mixer")
-                        BenefitItem(text = "Alle Sounds & Musik")
+                        BenefitItem(text = "All sounds & music")
                     }
                 }
 
@@ -859,7 +859,7 @@ private fun PremiumUpsellCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Premium holen",
+                        text = "Get Premium",
                         fontFamily = Poppins,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -947,7 +947,7 @@ private fun NayaUpgradeDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Später", color = textSecondary, fontFamily = Poppins)
+                Text("Later", color = textSecondary, fontFamily = Poppins)
             }
         },
         containerColor = cardSurface,

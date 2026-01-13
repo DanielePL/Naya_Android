@@ -384,7 +384,7 @@ private fun SmallWorkoutCard(
             )
 
             Text(
-                text = "${workout.exercises.size} Übungen",
+                text = "${workout.exercises.size} exercises",
                 color = textGray,
                 fontSize = 12.sp
             )

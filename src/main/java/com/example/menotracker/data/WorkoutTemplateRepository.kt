@@ -425,6 +425,39 @@ object WorkoutTemplateRepository {
     }
 
     /**
+     * Update just the video URL of a workout template (Admin only)
+     * This is more efficient than updating the entire template
+     */
+    suspend fun updateWorkoutTemplateVideoUrl(
+        templateId: String,
+        videoUrl: String?
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "🎬 Updating video URL for template: $templateId")
+            Log.d(TAG, "🔗 New URL: $videoUrl")
+
+            SupabaseClient.client
+                .from("workout_templates")
+                .update(
+                    mapOf("video_url" to videoUrl)
+                ) {
+                    filter {
+                        eq("id", templateId)
+                    }
+                }
+
+            // Invalidate cache so changes are reflected
+            clearPublicTemplatesCache()
+
+            Log.d(TAG, "✅ Video URL updated successfully")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error updating video URL: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Load public workout templates (user_id IS NULL)
      * These are the 16 example templates created via SQL
      *
@@ -542,7 +575,8 @@ object WorkoutTemplateRepository {
                         exercises = exercisesWithSets,
                         createdAt = parseTimestamp(template.createdAt),
                         sports = template.sports,
-                        intensity = template.intensity ?: "AKTIV"
+                        intensity = template.intensity ?: "AKTIV",
+                        videoUrl = template.videoUrl
                     )
                 }
 
